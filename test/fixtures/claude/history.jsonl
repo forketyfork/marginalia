@@ -1,0 +1,9 @@
+{"display":"Old prompt one, no session id","pastedContents":{},"project":"/Users/alice/dev/old","timestamp":1759300000000}
+{"display":"Old prompt two, same day","pastedContents":{},"project":"/Users/alice/dev/old","timestamp":1759303600000}
+{"display":"Old prompt three, next day","pastedContents":{},"project":"/Users/alice/dev/old","timestamp":1759400000000}
+{"display":"Please list the files in the repo and summarize them.","pastedContents":{},"project":"/Users/alice/dev/demo","timestamp":1792000000000,"sessionId":"11111111-1111-1111-1111-111111111111"}
+{"display":"Deleted session prompt A","pastedContents":{"1":{"id":1,"type":"text","content":"pasted blob"}},"project":"/Users/alice/dev/gone","timestamp":1793000000000,"sessionId":"deadbeef-0000-4000-8000-000000000001"}
+{"display":"Deleted session prompt B","pastedContents":{},"project":"/Users/alice/dev/gone","timestamp":1793000600000,"sessionId":"deadbeef-0000-4000-8000-000000000001"}
+not json
+{"display":"/exit","pastedContents":{},"project":"/Users/alice/dev/gone","timestamp":1793100000000,"sessionId":"cafe0000-0000-4000-8000-000000000002"}
+{"display":"/implement the plan in docs/plan.md","pastedContents":{},"project":"/Users/alice/dev/gone","timestamp":1793200000000,"sessionId":"cafe0000-0000-4000-8000-000000000003"}
