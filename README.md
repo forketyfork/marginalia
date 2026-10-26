@@ -112,7 +112,8 @@ plus a `local_<uuid>.json` sidecar holding the title you see in the app, the fol
 the system prompt, and whether the run was a scheduled task; Marginalia stores both as one
 transcript, and a renamed or starred session counts as updated.
 
-`scripts/import-fass-carve.ts` is a one-off that turns rows carved out of an old fass index with
+`scripts/import-fass-carve.ts` is a one-off that turns rows carved out of an old
+[fass](https://github.com/forketyfork/fuzzy-agent-session-search) index with
 SQLite's `.recover` into archived prompt-only sessions; anything placed in the archive directory with
 a sidecar is picked up on the next refresh.
 
