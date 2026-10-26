@@ -11,6 +11,7 @@ import { renderMarkdown } from "../markdown";
 import { renderToolResult } from "../tools";
 import { AUX_KINDS, type PairedResult, toHighlight, type ViewOptions } from "../view";
 import { BlockView } from "./BlockView";
+import { Disclosure, Reveal } from "./Reveal";
 import { ToolCallCard } from "./ToolCallCard";
 
 export interface EntryProps {
@@ -153,27 +154,33 @@ export const EntryView = memo(function EntryView(props: EntryProps) {
       case "thinking": {
         if (!options.showThinking && highlights.length === 0 && chips.length === 0) return null;
         return (
-          <details key={i} className="thinking" open>
-            <summary>
-              Thinking
-              {entry.thinkingMs !== null && i === entry.blocks.findIndex((b) => b.type === "thinking")
-                ? ` · ${formatDuration(entry.thinkingMs)}`
-                : ""}
-              <BlockChips chips={chips} onSelect={onSelectAnnotation} />
-              <button
-                type="button"
-                className="link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onAnnotate(
-                    { entryId: entry.id, blockIndex: i, agentId, quote: null },
-                    preview(block.text, 300),
-                  );
-                }}
-              >
-                annotate
-              </button>
-            </summary>
+          <Disclosure
+            key={i}
+            className="thinking"
+            defaultOpen
+            summary={
+              <>
+                Thinking
+                {entry.thinkingMs !== null && i === entry.blocks.findIndex((b) => b.type === "thinking")
+                  ? ` · ${formatDuration(entry.thinkingMs)}`
+                  : ""}
+                <BlockChips chips={chips} onSelect={onSelectAnnotation} />
+                <button
+                  type="button"
+                  className="link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onAnnotate(
+                      { entryId: entry.id, blockIndex: i, agentId, quote: null },
+                      preview(block.text, 300),
+                    );
+                  }}
+                >
+                  annotate
+                </button>
+              </>
+            }
+          >
             <BlockView
               entryId={entry.id}
               blockIndex={i}
@@ -188,7 +195,7 @@ export const EntryView = memo(function EntryView(props: EntryProps) {
                 Show all {block.fullLength?.toLocaleString("en-US")} characters
               </button>
             )}
-          </details>
+          </Disclosure>
         );
       }
       case "tool_use": {
@@ -250,28 +257,32 @@ export const EntryView = memo(function EntryView(props: EntryProps) {
         );
       case "data":
         return (
-          <details key={i} className="data" open={isAux}>
-            <summary>
-              {block.label}
-              <BlockChips chips={chips} onSelect={onSelectAnnotation} />
-            </summary>
-            <div className="reveal">
-              <BlockView
-                entryId={entry.id}
-                blockIndex={i}
-                agentId={agentId}
-                html={renderJsonOrPlain(text ?? block.text)}
-                highlights={highlights}
-                onSelectAnnotation={onSelectAnnotation}
-                onOrphans={onOrphans}
-              />
-              {block.truncated && text === undefined && (
-                <button type="button" className="link" onClick={() => void loadBlock(i)}>
-                  Show all {block.fullLength.toLocaleString("en-US")} characters
-                </button>
-              )}
-            </div>
-          </details>
+          <Disclosure
+            key={i}
+            className="data"
+            defaultOpen={isAux}
+            summary={
+              <>
+                {block.label}
+                <BlockChips chips={chips} onSelect={onSelectAnnotation} />
+              </>
+            }
+          >
+            <BlockView
+              entryId={entry.id}
+              blockIndex={i}
+              agentId={agentId}
+              html={renderJsonOrPlain(text ?? block.text)}
+              highlights={highlights}
+              onSelectAnnotation={onSelectAnnotation}
+              onOrphans={onOrphans}
+            />
+            {block.truncated && text === undefined && (
+              <button type="button" className="link" onClick={() => void loadBlock(i)}>
+                Show all {block.fullLength.toLocaleString("en-US")} characters
+              </button>
+            )}
+          </Disclosure>
         );
     }
   };
@@ -329,10 +340,10 @@ export const EntryView = memo(function EntryView(props: EntryProps) {
         </button>
       </header>
       {!isAux && <div className="entry-body">{entry.blocks.map(renderBlock)}</div>}
-      {isAux && auxOpen && (
-        <div className="reveal">
-          <div className="entry-body">{entry.blocks.map(renderBlock)}</div>
-        </div>
+      {isAux && (
+        <Reveal open={auxOpen}>
+          {auxOpen && <div className="entry-body">{entry.blocks.map(renderBlock)}</div>}
+        </Reveal>
       )}
     </article>
   );

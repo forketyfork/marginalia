@@ -125,8 +125,9 @@ neon theme laid over the same structure: a drifting static texture and scanlines
 as fixed pseudo-elements, and glow is applied to borders, badges, chips, marks and the brand but never
 to body text, so transcripts stay readable. Kind and agent colours travel as `--kind` and `--agent`
 custom properties set by the `kind-*` and `agent-*` classes, so chips, pills, badges and cards share
-one rule each in both themes. Anything that opens (tool bodies, context entries, data blocks, the
-composer) sits in a `reveal` wrapper whose grid row animates from zero to its content height on mount,
-so it unfolds rather than pops; the session list slides rows to their new place with a FLIP animation
-when a refresh reorders them and flashes a row whose session changed. All motion stops under
-`prefers-reduced-motion`.
+one rule each in both themes. Anything that opens or closes (tool bodies, context entries, data
+blocks, injected tags, the composer) sits in a `reveal` wrapper whose single grid row is animated
+between empty and its content height from script, so it unfolds and folds instead of popping and
+stays mounted until the motion ends; the session list slides rows to their new place with a FLIP
+animation when a refresh reorders them and flashes a row whose session changed. All motion stops
+under `prefers-reduced-motion`.

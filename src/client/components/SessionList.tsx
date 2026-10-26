@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { ANNOTATION_KINDS, type AnnotationKind, KIND_META } from "../../shared/annotation";
 import { formatCost, formatRelative, shortenPath } from "../../shared/format";
 import { AGENT_LABEL, AGENTS, type Agent, type SessionSummary, SOURCE_LABEL } from "../../shared/model";
-import { planRowMotion, type RowLayout } from "../motion";
+import { planRowMotion, type RowLayout, reducedMotion } from "../motion";
 import { routeToHash } from "../router";
 
 export interface SessionFilters {
@@ -36,10 +36,6 @@ function toggle<T>(list: T[], item: T): T[] {
 /** Rows this close to the visible part of the list animate; the rest simply take their new place. */
 const VIEW_MARGIN = 200;
 const MOVE_MS = 320;
-
-function reducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
 
 function dayLabel(ms: number, now: Date): string {
   const d = new Date(ms);

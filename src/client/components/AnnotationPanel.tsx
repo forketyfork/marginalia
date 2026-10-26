@@ -5,6 +5,7 @@ import * as api from "../api";
 import { renderMarkdown } from "../markdown";
 import { AnnotationForm, rememberedKind } from "./AnnotationForm";
 import { Html } from "./Html";
+import { Reveal } from "./Reveal";
 
 export interface Composer {
   target: AnnotationTarget;
@@ -69,8 +70,8 @@ export function AnnotationPanel(props: Props) {
           hide resolved
         </label>
       </div>
-      {composer && (
-        <div className="reveal">
+      <Reveal open={composer !== null}>
+        {composer && (
           <div className="composer">
             <div className="section-label">New annotation · {targetLabel(composer.target)}</div>
             <AnnotationForm
@@ -93,8 +94,8 @@ export function AnnotationPanel(props: Props) {
               onCancel={onCloseComposer}
             />
           </div>
-        </div>
-      )}
+        )}
+      </Reveal>
       {!composer && annotations.length === 0 && (
         <div className="muted pad">
           Select text in the transcript, or use “annotate” on a message, thought, or tool call.

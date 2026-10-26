@@ -35,3 +35,33 @@ export function planRowMotion(
   }
   return plan;
 }
+
+export const REVEAL_MS = 220;
+
+export function reducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+const REVEAL_FRAMES: Keyframe[] = [
+  { gridTemplateRows: "0fr", opacity: 0 },
+  { gridTemplateRows: "1fr", opacity: 1 },
+];
+
+/**
+ * Grows a `reveal` grid wrapper open or shrinks it closed. The wrapper clips its content while the
+ * animation runs. A closing animation holds its end state, so the caller hides or unmounts the content
+ * once the animation has finished, and cancels it if the content is shown again.
+ */
+export function animateReveal(el: HTMLElement, open: boolean): Animation {
+  el.classList.add("animating");
+  const animation = el.animate(open ? REVEAL_FRAMES : [...REVEAL_FRAMES].reverse(), {
+    duration: reducedMotion() ? 0 : REVEAL_MS,
+    easing: open ? "ease-out" : "ease-in",
+    fill: open ? "none" : "forwards",
+  });
+  animation.finished.then(
+    () => el.classList.remove("animating"),
+    () => {},
+  );
+  return animation;
+}

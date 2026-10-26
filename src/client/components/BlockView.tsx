@@ -1,5 +1,26 @@
 import { memo, useLayoutEffect, useRef } from "react";
 import { applyHighlights, type HighlightItem } from "../anchoring";
+import { animateReveal } from "../motion";
+
+/**
+ * Injected tags live in rendered HTML rather than in a component, so their unfolding and folding is
+ * driven here. A click while the body is folding reopens it.
+ */
+function toggleInjected(injected: HTMLElement, body: HTMLElement): void {
+  for (const running of body.getAnimations()) running.cancel();
+  const opening = !injected.classList.contains("open") || body.classList.contains("closing");
+  body.classList.toggle("closing", !opening);
+  injected.classList.add("open");
+  animateReveal(body, opening).finished.then(
+    () => {
+      if (opening) return;
+      injected.classList.remove("open");
+      body.classList.remove("closing");
+      for (const held of body.getAnimations()) held.cancel();
+    },
+    () => {},
+  );
+}
 
 interface Props {
   entryId: string;
@@ -51,8 +72,9 @@ export const BlockView = memo(function BlockView({
           onSelectAnnotation(mark.dataset.ann);
           return;
         }
-        const head = target.closest<HTMLElement>(".injected-head");
-        if (head?.parentElement) head.parentElement.classList.toggle("open");
+        const injected = target.closest<HTMLElement>(".injected-head")?.parentElement;
+        const body = injected?.querySelector<HTMLElement>(":scope > .injected-body");
+        if (injected && body) toggleInjected(injected, body);
       }}
     />
   );

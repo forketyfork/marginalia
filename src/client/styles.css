@@ -1230,37 +1230,22 @@ pre.code.numbered .ln::before {
 }
 
 /*
- * Motion. Anything that opens grows from zero height: the `reveal` wrapper is a grid whose single row
- * animates from 0fr to 1fr on mount, so a tool body, a context entry, a data block or the composer
- * unfolds instead of popping in. Session rows slide to their new place from script when a refresh
- * reorders the list, and a row whose session changed flashes.
+ * Motion. Anything that opens grows from zero height and anything that closes shrinks back: a `reveal`
+ * wrapper is a grid whose single row is animated between 0fr and 1fr from script (motion.ts), so a tool
+ * body, a context entry, a data block or the composer unfolds and folds instead of popping, and stays
+ * mounted while it folds. Session rows slide to their new place when a refresh reorders the list, and a
+ * row whose session changed flashes.
  */
 .reveal {
   display: grid;
-  animation: reveal 220ms ease-out;
 }
 
 .reveal > * {
   min-height: 0;
-  animation: reveal-clip 220ms;
 }
 
-@keyframes reveal {
-  from {
-    grid-template-rows: 0fr;
-    opacity: 0;
-  }
-  to {
-    grid-template-rows: 1fr;
-    opacity: 1;
-  }
-}
-
-@keyframes reveal-clip {
-  from,
-  to {
-    overflow: hidden;
-  }
+.reveal.animating > * {
+  overflow: hidden;
 }
 
 .session-row.touched {
@@ -1279,8 +1264,6 @@ pre.code.numbered .ln::before {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal,
-  .reveal > *,
   .session-row.touched {
     animation: none;
   }

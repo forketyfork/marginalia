@@ -9,6 +9,7 @@ import { type PairedResult, type ToolUseBlock, toHighlight, type ViewOptions } f
 import { BlockView } from "./BlockView";
 import { BlockChips } from "./EntryView";
 import { Html } from "./Html";
+import { Disclosure, Reveal } from "./Reveal";
 
 interface Props {
   agent: Agent;
@@ -117,76 +118,71 @@ export function ToolCallCard(props: Props) {
           )}
         </span>
       </div>
-      {open && (
-        <div className="reveal">
-          <div className="tool-body">
+      <Reveal open={open}>
+        <div className="tool-body">
+          <div className="tool-section">
+            <div className="section-label">Input</div>
+            <BlockView
+              entryId={entry.id}
+              blockIndex={blockIndex}
+              agentId={agentId}
+              html={inputHtml}
+              className="tool-input"
+              highlights={callHighlights}
+              onSelectAnnotation={onSelectAnnotation}
+              onOrphans={onOrphans}
+            />
+          </div>
+          {result && (
             <div className="tool-section">
-              <div className="section-label">Input</div>
+              <div className="section-label">
+                Result{result.entry.timestamp !== null ? ` · ${formatTime(result.entry.timestamp)}` : ""}
+              </div>
               <BlockView
-                entryId={entry.id}
-                blockIndex={blockIndex}
+                entryId={result.entry.id}
+                blockIndex={result.blockIndex}
                 agentId={agentId}
-                html={inputHtml}
-                className="tool-input"
-                highlights={callHighlights}
+                html={resultHtml}
+                className={`tool-result${isError ? " error" : ""}`}
+                highlights={resultHighlights}
                 onSelectAnnotation={onSelectAnnotation}
                 onOrphans={onOrphans}
               />
+              {result.block.truncated && fullText === null && (
+                <button
+                  type="button"
+                  className="link"
+                  onClick={async () => {
+                    const full = await loadFull(result.entry.id, result.blockIndex);
+                    if (full.type === "tool_result") setFullText(full.text);
+                  }}
+                >
+                  Show full result ({formatBytes(result.block.fullLength)})
+                </button>
+              )}
+              {subagentId && (
+                <a
+                  className="subagent-link"
+                  href={routeToHash({
+                    page: "session",
+                    agent,
+                    id: sessionId,
+                    agentId: subagentId,
+                    focus: null,
+                  })}
+                >
+                  Open subagent transcript →
+                </a>
+              )}
+              {detailsHtml && (
+                <Disclosure className="data" summary="Details">
+                  <Html className="tool-details" html={detailsHtml} />
+                </Disclosure>
+              )}
             </div>
-            {result && (
-              <div className="tool-section">
-                <div className="section-label">
-                  Result{result.entry.timestamp !== null ? ` · ${formatTime(result.entry.timestamp)}` : ""}
-                </div>
-                <BlockView
-                  entryId={result.entry.id}
-                  blockIndex={result.blockIndex}
-                  agentId={agentId}
-                  html={resultHtml}
-                  className={`tool-result${isError ? " error" : ""}`}
-                  highlights={resultHighlights}
-                  onSelectAnnotation={onSelectAnnotation}
-                  onOrphans={onOrphans}
-                />
-                {result.block.truncated && fullText === null && (
-                  <button
-                    type="button"
-                    className="link"
-                    onClick={async () => {
-                      const full = await loadFull(result.entry.id, result.blockIndex);
-                      if (full.type === "tool_result") setFullText(full.text);
-                    }}
-                  >
-                    Show full result ({formatBytes(result.block.fullLength)})
-                  </button>
-                )}
-                {subagentId && (
-                  <a
-                    className="subagent-link"
-                    href={routeToHash({
-                      page: "session",
-                      agent,
-                      id: sessionId,
-                      agentId: subagentId,
-                      focus: null,
-                    })}
-                  >
-                    Open subagent transcript →
-                  </a>
-                )}
-                {detailsHtml && (
-                  <details className="data">
-                    <summary>Details</summary>
-                    <div className="reveal">
-                      <Html className="tool-details" html={detailsHtml} />
-                    </div>
-                  </details>
-                )}
-              </div>
-            )}
-          </div>
+          )}
         </div>
-      )}
+      </Reveal>
     </div>
   );
 }
