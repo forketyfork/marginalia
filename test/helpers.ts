@@ -1,4 +1,4 @@
-import { mkdtempSync } from "node:fs";
+import { mkdirSync, mkdtempSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { Config } from "../src/server/config";
 
@@ -62,6 +62,7 @@ export function fixtureConfig(overrides: Partial<Config> = {}): Config {
 /** A scratch directory under the repository's .tmp so tests never touch the system temp dir. */
 export function scratchDir(prefix: string): string {
   const base = resolve(import.meta.dir, "..", ".tmp");
+  mkdirSync(base, { recursive: true });
   return mkdtempSync(join(base, `${prefix}-`));
 }
 
