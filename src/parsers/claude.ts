@@ -510,14 +510,16 @@ function addAttachment(
   const content = attachment.content;
   if (typeof content === "string" && content.length > 0) texts.push(content);
   else if (Array.isArray(content)) texts.push(...content.filter((c): c is string => typeof c === "string"));
-  for (const key of ["stdout", "stderr"]) {
-    const v = str(attachment, key);
-    if (v && v.length > 0) texts.push(`${key}: ${v}`);
-  }
   const text = texts.join("\n").trim();
   const rest = omitKeys(attachment, new Set(["type", "content", "stdout", "stderr"]));
   const blocks: Block[] = [];
   if (text.length > 0) blocks.push({ type: "text", text });
+  // Hook output is program output, not prose: as data it is laid out as JSON and never read as Markdown.
+  for (const key of ["stdout", "stderr"]) {
+    const v = str(attachment, key);
+    if (v && v.length > 0)
+      blocks.push({ type: "data", label: key, text: v, truncated: false, fullLength: v.length });
+  }
   if (Object.keys(rest).length > 0) {
     const json = prettyJson(rest);
     blocks.push({ type: "data", label: subtype, text: json, truncated: false, fullLength: json.length });

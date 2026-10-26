@@ -14,7 +14,7 @@ and `isSidechain: true`.
 | `user` | `user` entry; `tool_result` entry when the content holds tool results; `meta` when `isMeta`; `compact` when `isCompactSummary`; `command` when the text is a `<command-name>` record. `toolUseResult` becomes the result's `details` (minus `originalFile`). `toolUseResult.agentId` registers a subagent. |
 | `assistant` | `assistant` entry. Consecutive lines with the same `message.id` are one entry. Empty `thinking` blocks (summarized thinking) are dropped; `thinkingDurationMs` is kept. `isApiErrorMessage` lines become `system` entries. |
 | `system` | `system` entry labelled by `subtype` (`turn_duration`, `stop_hook_summary`, `compact_boundary`, `informational`, `model_refusal_fallback`, `away_summary`, ...); `local_command` becomes a `command` entry. |
-| `attachment` | `attachment` entry labelled by `attachment.type` (`environment`, `skill_listing`, `hook_success`, `deferred_tools_record`, `prompt_snapshot`, ...). |
+| `attachment` | `attachment` entry labelled by `attachment.type` (`environment`, `skill_listing`, `hook_success`, `deferred_tools_record`, `prompt_snapshot`, ...); `content` is text, hook `stdout` and `stderr` are data blocks. |
 | `ai-title`, `agent-name`, `summary` | Session title (agent name wins over the AI title, which wins over a legacy summary, which wins over the first prompt). |
 | `cost-state` | Total cost and token totals. |
 | `pr-link` | Linked pull requests. |

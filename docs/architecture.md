@@ -94,7 +94,11 @@ elements to click. Blocks set their HTML imperatively so React does not fight th
 
 Markdown is rendered with `marked` and sanitized with DOMPurify. Raw HTML in agent output is escaped
 rather than interpreted: `<system-reminder>` and friends are content. Known injected tags are split
-out of user messages into collapsible boxes before Markdown rendering. Tool calls get tool-specific
+out of user messages into collapsible boxes before Markdown rendering. Emphasis pseudo-tags such as
+`<IMPORTANT>` are marked up wherever they occur in text, plain output and laid-out JSON strings alike,
+and a Markdown block that opens with one is rendered as Markdown instead of being frozen as escaped
+HTML. Hook output (`stdout`, `stderr`) is a data block, not prose, so JSON output is laid out and
+nothing in it is read as Markdown. Tool calls get tool-specific
 input rendering for the common cases (shell commands, file edits as diffs, file writes, subagent
 prompts, todo lists) and a key/value fallback for the rest. Entries use `content-visibility: auto` so
 long sessions stay responsive without a virtualized list.

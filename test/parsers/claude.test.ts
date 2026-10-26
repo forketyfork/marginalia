@@ -104,7 +104,10 @@ describe("parseClaude", () => {
     const attachment = t.entries.find((e) => e.id === "at1");
     expect(attachment?.kind).toBe("attachment");
     expect(attachment?.label).toBe("hook_success · SessionStart:startup");
-    expect(attachment?.blocks[0]).toMatchObject({ type: "text", text: "stdout: hook ran" });
+    expect(attachment?.blocks).toEqual([
+      { type: "data", label: "stdout", text: "hook ran", truncated: false, fullLength: 8 },
+      expect.objectContaining({ type: "data", label: "hook_success" }),
+    ]);
   });
 
   test("falls back to the first prompt as title and tags subagent transcripts", () => {

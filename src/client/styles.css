@@ -1218,6 +1218,12 @@ mark.ann-focus {
   color: var(--fg);
 }
 
+/* Prompt emphasis tags such as <IMPORTANT>, wherever they appear in text */
+.ptag {
+  color: var(--hl-keyword);
+  font-weight: 600;
+}
+
 /* One-line shell commands laid out one statement per line: the separators stay, dimmed */
 pre.code .sep {
   color: var(--fg-muted);

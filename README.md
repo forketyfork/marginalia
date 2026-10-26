@@ -37,9 +37,10 @@ Open http://127.0.0.1:4747. The first start indexes the whole session history (a
   input and result. Shell commands, file contents and Markdown code fences are syntax-highlighted,
   and a one-line shell command made of several statements is shown one statement per line with loop
   and branch bodies indented. JSON inputs and results are laid out for reading, with long text fields
-  shown as indented blocks and JSON-in-a-string unfolded. Injected context (`<system-reminder>`, hook
-  output, skill listings, compaction summaries, slash commands) is shown as dimmed one-liners that
-  expand on click, and can be hidden
+  shown as indented blocks and JSON-in-a-string unfolded. Emphasis tags such as `<IMPORTANT>` are
+  highlighted wherever they appear. Injected context (`<system-reminder>`, hook output, skill
+  listings, compaction summaries, slash commands) is shown as dimmed one-liners that expand on click,
+  and can be hidden
   with the "system & context" toggle. Subagent transcripts are linked from the header and from the
   `Agent` tool result that launched them.
 - **Annotating**: select text and press *Annotate selection*, or use *annotate* on a message,

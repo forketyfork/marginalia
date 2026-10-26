@@ -87,6 +87,15 @@ describe("renderJson", () => {
     expect(text).toContain('{\\"leaf\\":1}');
   });
 
+  test("marks pseudo-tags inside string values", () => {
+    const html = renderJson({ note: "<IMPORTANT>\nread me", short: "<NOTE>" });
+    expect(html).toContain('<span class="ptag">&lt;IMPORTANT&gt;</span>');
+    expect(html).toContain('<span class="ptag">&lt;NOTE&gt;</span>');
+    expect(textOf(html)).toBe(
+      '{\n  "note": """\n    <IMPORTANT>\n    read me\n  """,\n  "short": "<NOTE>"\n}',
+    );
+  });
+
   test("escapes markup in keys and values", () => {
     const html = renderJson({ "<k>": "<b>bold</b>", block: "<i>\n</i>" });
     expect(html).not.toContain("<b>");

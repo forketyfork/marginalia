@@ -1,4 +1,4 @@
-import { escapeHtml, renderPlain } from "./html";
+import { escapeHtml, markPseudoTags, renderPlain } from "./html";
 
 const INDENT = "  ";
 /** Strings at least this long are laid out as blocks even without a line break. */
@@ -70,10 +70,10 @@ function stringHtml(value: string, depth: number, nesting: number): string {
     if (nested !== undefined) return block(jsonHtml(nested, depth + 1, nesting + 1), depth);
   }
   if (value.includes("\n") || value.length >= BLOCK_MIN_LENGTH) {
-    const lines = value.split("\n").map((line) => pad(depth + 1) + escapeHtml(line));
+    const lines = value.split("\n").map((line) => pad(depth + 1) + markPseudoTags(escapeHtml(line)));
     return block(`<span class="str-text">${lines.join("\n")}</span>`, depth, false);
   }
-  return `<span class="hljs-string">${escapeHtml(JSON.stringify(value))}</span>`;
+  return `<span class="hljs-string">${markPseudoTags(escapeHtml(JSON.stringify(value)))}</span>`;
 }
 
 function block(inner: string, depth: number, indentFirst = true): string {

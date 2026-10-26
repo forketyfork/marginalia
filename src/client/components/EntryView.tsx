@@ -250,7 +250,7 @@ export const EntryView = memo(function EntryView(props: EntryProps) {
         );
       case "data":
         return (
-          <details key={i} className="data">
+          <details key={i} className="data" open={isAux}>
             <summary>
               {block.label}
               <BlockChips chips={chips} onSelect={onSelectAnnotation} />
