@@ -22,6 +22,10 @@
   --kind-unexpected: #dc2626;
   --kind-good: #16a34a;
   --kind-note: #6b7280;
+  --agent-claude: #c2410c;
+  --agent-cowork: #a21caf;
+  --agent-codex: #0f766e;
+  --agent-gemini: #4f46e5;
   --mark-learn: rgba(37, 99, 235, 0.22);
   --mark-improve: rgba(217, 119, 6, 0.28);
   --mark-unexpected: rgba(220, 38, 38, 0.22);
@@ -46,43 +50,62 @@
   --panel-w: 360px;
 }
 
+/*
+ * Dark mode is the Sprawl: the sky above the port the colour of television tuned to a dead channel,
+ * neon on black. The static, scanlines and glow are laid over the page at the end of this file.
+ */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #121416;
-    --bg-elev: #1b1e21;
-    --bg-sunken: #0e1012;
-    --fg: #e6e6e3;
-    --fg-muted: #9aa0a6;
-    --border: #2b2f34;
-    --accent: #60a5fa;
-    --danger: #f87171;
-    --user: #1e2a3f;
-    --user-border: #2f4a73;
-    --assistant: #1b1e21;
-    --thinking: #211a2b;
-    --thinking-border: #4c3a6b;
-    --tool: #171a1d;
-    --tool-border: #2f353b;
-    --tool-error: #2a1717;
-    --tool-error-border: #5b2a2a;
-    --aux: #16181b;
-    --mark-learn: rgba(96, 165, 250, 0.3);
-    --mark-improve: rgba(251, 191, 36, 0.3);
-    --mark-unexpected: rgba(248, 113, 113, 0.3);
-    --mark-good: rgba(74, 222, 128, 0.28);
-    --mark-note: rgba(156, 163, 175, 0.3);
-    --diff-add: #14301f;
-    --diff-del: #3a1a1a;
-    --hl-keyword: #c678dd;
-    --hl-string: #98c379;
-    --hl-number: #d19a66;
-    --hl-comment: #7f848e;
-    --hl-attr: #61afef;
-    --hl-builtin: #e6c07b;
-    --hl-title: #61afef;
-    --hl-variable: #e06c75;
-    --hl-literal: #56b6c2;
-    --hl-punct: #9aa0a6;
+    --neon-cyan: #19e6ff;
+    --neon-magenta: #ff2ec4;
+    --neon-lime: #9dff3c;
+    --neon-amber: #ffb000;
+    --neon-violet: #9a6bff;
+    --neon-red: #ff3864;
+    --bg: #070910;
+    --bg-elev: #0c1019;
+    --bg-sunken: #04060b;
+    --fg: #d9e4f5;
+    --fg-muted: #7b89a6;
+    --border: #1a2334;
+    --accent: var(--neon-cyan);
+    --danger: var(--neon-red);
+    --user: #081a24;
+    --user-border: #124a5c;
+    --assistant: #0c1019;
+    --thinking: #110c20;
+    --thinking-border: #3b2a6e;
+    --tool: #090d15;
+    --tool-border: #1a2334;
+    --tool-error: #1a0912;
+    --tool-error-border: #5c1a30;
+    --aux: #080b12;
+    --kind-learn: var(--neon-cyan);
+    --kind-improve: var(--neon-amber);
+    --kind-unexpected: var(--neon-red);
+    --kind-good: var(--neon-lime);
+    --kind-note: var(--neon-violet);
+    --agent-claude: #ff7a1a;
+    --agent-cowork: var(--neon-magenta);
+    --agent-codex: #2ef2c2;
+    --agent-gemini: #7c8cff;
+    --mark-learn: rgba(25, 230, 255, 0.26);
+    --mark-improve: rgba(255, 176, 0, 0.28);
+    --mark-unexpected: rgba(255, 56, 100, 0.3);
+    --mark-good: rgba(157, 255, 60, 0.24);
+    --mark-note: rgba(154, 107, 255, 0.3);
+    --diff-add: #0a2a1a;
+    --diff-del: #2d0a1a;
+    --hl-keyword: #ff4fd8;
+    --hl-string: #b6ff6a;
+    --hl-number: #ffb84d;
+    --hl-comment: #56627c;
+    --hl-attr: #5ee7ff;
+    --hl-builtin: #ffd166;
+    --hl-title: #5ee7ff;
+    --hl-variable: #ff8a65;
+    --hl-literal: #b48cff;
+    --hl-punct: #7b89a6;
   }
 }
 
@@ -299,35 +322,36 @@ pre.plain {
 
 .chip.on {
   color: #fff;
-  background: var(--fg-muted);
+  background: var(--kind, var(--agent, var(--fg-muted)));
 }
 
-.chip.kind-learn.on {
-  background: var(--kind-learn);
+/* Kind and agent colours travel as custom properties, so chips, pills, badges and cards share one rule each */
+.kind-learn {
+  --kind: var(--kind-learn);
 }
-.chip.kind-improve.on {
-  background: var(--kind-improve);
+.kind-improve {
+  --kind: var(--kind-improve);
 }
-.chip.kind-unexpected.on {
-  background: var(--kind-unexpected);
+.kind-unexpected {
+  --kind: var(--kind-unexpected);
 }
-.chip.kind-good.on {
-  background: var(--kind-good);
+.kind-good {
+  --kind: var(--kind-good);
 }
-.chip.kind-note.on {
-  background: var(--kind-note);
+.kind-note {
+  --kind: var(--kind-note);
 }
-.chip.agent-claude.on {
-  background: #c2410c;
+.agent-claude {
+  --agent: var(--agent-claude);
 }
-.chip.agent-cowork.on {
-  background: #a21caf;
+.agent-cowork {
+  --agent: var(--agent-cowork);
 }
-.chip.agent-codex.on {
-  background: #0f766e;
+.agent-codex {
+  --agent: var(--agent-codex);
 }
-.chip.agent-gemini.on {
-  background: #4f46e5;
+.agent-gemini {
+  --agent: var(--agent-gemini);
 }
 
 .session-list {
@@ -398,23 +422,11 @@ pre.plain {
   padding: 1px 6px;
   border-radius: 4px;
   color: #fff;
+  background: var(--agent, var(--fg-muted));
   flex-shrink: 0;
 }
 
-.badge.agent-claude {
-  background: #c2410c;
-}
-.badge.agent-cowork {
-  background: #a21caf;
-}
-.badge.agent-codex {
-  background: #0f766e;
-}
-.badge.agent-gemini {
-  background: #4f46e5;
-}
 .badge.sub {
-  background: var(--fg-muted);
   text-transform: none;
   letter-spacing: 0;
 }
@@ -426,25 +438,11 @@ pre.plain {
   padding: 0 7px;
   border-radius: 999px;
   color: #fff;
+  background: var(--kind, var(--kind-note));
   border: none;
   cursor: pointer;
 }
 
-.pill.kind-learn {
-  background: var(--kind-learn);
-}
-.pill.kind-improve {
-  background: var(--kind-improve);
-}
-.pill.kind-unexpected {
-  background: var(--kind-unexpected);
-}
-.pill.kind-good {
-  background: var(--kind-good);
-}
-.pill.kind-note {
-  background: var(--kind-note);
-}
 .pill.done {
   background: transparent;
   color: var(--fg-muted);
@@ -1041,7 +1039,7 @@ mark.ann-focus {
 
 .ann-card {
   border: 1px solid var(--border);
-  border-left: 4px solid var(--kind-note);
+  border-left: 4px solid var(--kind, var(--kind-note));
   border-radius: 6px;
   padding: 8px;
   background: var(--bg-elev);
@@ -1052,18 +1050,6 @@ mark.ann-focus {
   font-size: 13px;
 }
 
-.ann-card.kind-learn {
-  border-left-color: var(--kind-learn);
-}
-.ann-card.kind-improve {
-  border-left-color: var(--kind-improve);
-}
-.ann-card.kind-unexpected {
-  border-left-color: var(--kind-unexpected);
-}
-.ann-card.kind-good {
-  border-left-color: var(--kind-good);
-}
 .ann-card.resolved {
   opacity: 0.6;
 }
@@ -1240,4 +1226,331 @@ pre.code.numbered .ln {
 }
 pre.code.numbered .ln::before {
   content: attr(data-n);
+}
+
+/*
+ * The Sprawl, dark mode only. Static drifts over the page and scanlines cross it; neon goes on the
+ * things you act on (borders, badges, chips, marks, the brand) and never on body text, which stays
+ * unlit so it remains readable. Motion stops under prefers-reduced-motion.
+ */
+@media (prefers-color-scheme: dark) {
+  body {
+    background:
+      radial-gradient(ellipse at 15% 0%, rgba(25, 230, 255, 0.08), transparent 55%),
+      radial-gradient(ellipse at 90% 100%, rgba(255, 46, 196, 0.08), transparent 55%), var(--bg);
+  }
+
+  /* The sky above the port: a dead channel */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -10%;
+    z-index: 9998;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 240px 240px;
+    opacity: 0.07;
+    mix-blend-mode: screen;
+    animation: dead-channel 0.7s steps(1) infinite;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, 0.14) 2px 3px);
+  }
+
+  @keyframes dead-channel {
+    0% {
+      transform: translate(0, 0);
+    }
+    20% {
+      transform: translate(-3%, 2%);
+    }
+    40% {
+      transform: translate(2%, -4%);
+    }
+    60% {
+      transform: translate(-4%, -2%);
+    }
+    80% {
+      transform: translate(3%, 3%);
+    }
+  }
+
+  @keyframes neon-flicker {
+    0%,
+    18%,
+    22%,
+    25%,
+    53%,
+    57%,
+    100% {
+      opacity: 1;
+    }
+    20%,
+    24%,
+    55% {
+      opacity: 0.5;
+      text-shadow: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body::before,
+    .brand {
+      animation: none;
+    }
+  }
+
+  ::selection {
+    background: rgba(255, 46, 196, 0.45);
+    color: #fff;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1c2740 transparent;
+  }
+
+  .topbar {
+    border-bottom-color: transparent;
+    background: linear-gradient(to bottom, #0d1220, #0a0e18);
+    box-shadow:
+      0 1px 0 rgba(25, 230, 255, 0.35),
+      0 1px 18px rgba(25, 230, 255, 0.18);
+  }
+
+  .brand {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--neon-cyan);
+    text-shadow:
+      0 0 1px #fff,
+      0 0 6px var(--neon-cyan),
+      0 0 18px rgba(25, 230, 255, 0.55);
+    animation: neon-flicker 11s infinite;
+  }
+
+  .brand:hover {
+    text-decoration: none;
+  }
+
+  .topbar nav a.active {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px rgba(25, 230, 255, 0.6);
+  }
+
+  a:hover,
+  button.link:hover {
+    text-shadow: 0 0 8px color-mix(in srgb, currentColor 60%, transparent);
+  }
+
+  button {
+    border-color: #1f2b42;
+    background: #0b101a;
+  }
+
+  button:hover {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 8px rgba(25, 230, 255, 0.25);
+  }
+
+  button.primary {
+    color: #03111a;
+    font-weight: 600;
+    background: var(--neon-cyan);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 12px rgba(25, 230, 255, 0.45);
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--neon-cyan);
+    box-shadow:
+      0 0 0 1px var(--neon-cyan),
+      0 0 12px rgba(25, 230, 255, 0.3);
+  }
+
+  .day {
+    color: color-mix(in srgb, var(--neon-cyan) 65%, var(--fg-muted));
+    letter-spacing: 0.12em;
+  }
+
+  .session-row:hover {
+    background: rgba(25, 230, 255, 0.05);
+  }
+
+  .session-row.selected {
+    background: linear-gradient(90deg, rgba(25, 230, 255, 0.12), transparent 70%);
+    box-shadow:
+      inset 3px 0 0 var(--neon-cyan),
+      inset 8px 0 14px -10px var(--neon-cyan);
+  }
+
+  .badge {
+    color: var(--agent, var(--fg-muted));
+    background: transparent;
+    border: 1px solid currentColor;
+    box-shadow:
+      0 0 6px color-mix(in srgb, currentColor 45%, transparent),
+      inset 0 0 6px color-mix(in srgb, currentColor 15%, transparent);
+    text-shadow: 0 0 6px color-mix(in srgb, currentColor 60%, transparent);
+  }
+
+  .badge.sub {
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  .chip {
+    background: #0a0e17;
+    border-color: #1a2334;
+  }
+
+  .chip.on {
+    --c: var(--kind, var(--agent, var(--fg)));
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 14%, transparent);
+    border-color: var(--c);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--c) 35%, transparent);
+    text-shadow: 0 0 6px color-mix(in srgb, var(--c) 60%, transparent);
+  }
+
+  .pill {
+    --c: var(--kind, var(--kind-note));
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 18%, transparent);
+    border: 1px solid var(--c);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--c) 35%, transparent);
+  }
+
+  .pill.done {
+    color: var(--fg-muted);
+    background: transparent;
+    border-color: var(--border);
+    box-shadow: none;
+  }
+
+  .pill.focus {
+    outline-color: var(--neon-cyan);
+  }
+
+  .head-row h1 {
+    text-shadow: 0 0 14px rgba(25, 230, 255, 0.25);
+  }
+
+  .entry-user {
+    border-color: rgba(25, 230, 255, 0.35);
+    box-shadow: 0 0 14px -6px rgba(25, 230, 255, 0.5);
+  }
+
+  .entry.focus,
+  .tool.focus,
+  .ann-card.focus {
+    outline-color: var(--neon-cyan);
+    box-shadow: 0 0 16px rgba(25, 230, 255, 0.35);
+  }
+
+  details.thinking {
+    border-left-color: var(--neon-violet);
+    box-shadow: inset 3px 0 12px -8px var(--neon-violet);
+  }
+
+  .tool.error {
+    box-shadow: 0 0 12px -4px rgba(255, 56, 100, 0.5);
+  }
+
+  .tool-status.ok {
+    color: var(--neon-lime);
+    text-shadow: 0 0 6px rgba(157, 255, 60, 0.6);
+    box-shadow: 0 0 6px rgba(157, 255, 60, 0.3);
+  }
+
+  .tool-status.error {
+    text-shadow: 0 0 6px rgba(255, 56, 100, 0.6);
+    box-shadow: 0 0 6px rgba(255, 56, 100, 0.3);
+  }
+
+  .section-label {
+    color: color-mix(in srgb, var(--neon-magenta) 60%, var(--fg-muted));
+    letter-spacing: 0.12em;
+  }
+
+  .md pre,
+  details.data pre.plain,
+  .tool-input pre.plain,
+  .tool-result pre.plain,
+  .tool-details pre.plain {
+    border-color: #152034;
+    box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.35);
+  }
+
+  .level {
+    text-shadow: 0 0 6px currentColor;
+  }
+
+  .ptag {
+    text-shadow: 0 0 6px color-mix(in srgb, var(--hl-keyword) 55%, transparent);
+  }
+
+  .diff .diff-hunk {
+    color: var(--neon-cyan);
+  }
+
+  mark.ann {
+    box-shadow: 0 0 8px var(--mark-note);
+  }
+  mark.ann-learn {
+    box-shadow: 0 0 8px var(--mark-learn);
+  }
+  mark.ann-improve {
+    box-shadow: 0 0 8px var(--mark-improve);
+  }
+  mark.ann-unexpected {
+    box-shadow: 0 0 8px var(--mark-unexpected);
+  }
+  mark.ann-good {
+    box-shadow: 0 0 8px var(--mark-good);
+  }
+  mark.ann-focus {
+    outline-color: var(--neon-cyan);
+    box-shadow: 0 0 14px rgba(25, 230, 255, 0.5);
+  }
+
+  .selection-toolbar button {
+    color: #03111a;
+    font-weight: 600;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 14px rgba(25, 230, 255, 0.55);
+  }
+
+  .composer {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 14px -4px rgba(25, 230, 255, 0.5);
+  }
+
+  .ann-card {
+    --c: var(--kind, var(--kind-note));
+    box-shadow: inset 4px 0 14px -10px var(--c);
+  }
+
+  .ann-card:hover {
+    border-color: color-mix(in srgb, var(--c) 50%, var(--border));
+  }
+
+  .tag {
+    border: 1px solid var(--border);
+  }
+
+  .notice {
+    border-color: var(--neon-violet);
+    box-shadow: 0 0 10px -4px var(--neon-violet);
+  }
 }

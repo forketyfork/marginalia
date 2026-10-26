@@ -119,3 +119,10 @@ wraps a Markdown document in a field reads as the document. `Read` results keep 
 a gutter drawn from a data attribute, so neither quotes nor copied text include them. Highlight spans
 change the DOM but not the text content that quotes anchor to; the JSON layout does change the text,
 so quotes anchor to the laid-out form.
+
+Styling is one stylesheet of CSS custom properties. The light theme is the default; dark mode is a
+neon theme laid over the same structure: a drifting static texture and scanlines sit above the page
+as fixed pseudo-elements, and glow is applied to borders, badges, chips, marks and the brand but never
+to body text, so transcripts stay readable. Kind and agent colours travel as `--kind` and `--agent`
+custom properties set by the `kind-*` and `agent-*` classes, so chips, pills, badges and cards share
+one rule each in both themes. Animation is disabled under `prefers-reduced-motion`.
