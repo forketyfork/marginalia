@@ -1,6 +1,9 @@
 import { isObject } from "../parsers/json";
 import { shortenPath } from "../shared/format";
-import { escapeHtml, renderDiff, renderMarkdown, renderPlain } from "./markdown";
+import { languageForPath, renderCode, renderNumberedLines } from "./code";
+import { escapeHtml } from "./html";
+import { renderJson, renderJsonOrPlain } from "./json";
+import { renderDiff, renderMarkdown } from "./markdown";
 import type { ToolResultBlock, ToolUseBlock } from "./view";
 
 const INLINE_LIMIT = 120;
@@ -29,7 +32,7 @@ export function toolSummary(block: ToolUseBlock): string {
     case "Edit":
     case "Write":
     case "NotebookEdit":
-      return shortenPath(field(input, "file_path") ?? "", 4);
+      return shortenPath(field(input, "file_path") ?? field(input, "notebook_path") ?? "", 4);
     case "Grep":
       return `${field(input, "pattern") ?? ""}${field(input, "path") ? ` in ${shortenPath(field(input, "path") ?? "", 3)}` : ""}`;
     case "Glob":
@@ -71,12 +74,12 @@ function keyValue(input: Record<string, unknown>, skip: ReadonlySet<string> = ne
     if (typeof value === "string") {
       rendered =
         value.length > INLINE_LIMIT || value.includes("\n")
-          ? renderPlain(value)
+          ? renderJsonOrPlain(value)
           : `<code>${escapeHtml(value)}</code>`;
     } else if (typeof value === "number" || typeof value === "boolean" || value === null) {
       rendered = `<code>${escapeHtml(String(value))}</code>`;
     } else {
-      rendered = renderPlain(JSON.stringify(value, null, 2));
+      rendered = renderJson(value);
     }
     rows.push(`<div class="kv"><span class="k">${escapeHtml(key)}</span>${rendered}</div>`);
   }
@@ -101,11 +104,11 @@ function structuredPatch(details: unknown): string | null {
 
 export function renderToolInput(block: ToolUseBlock, resultDetails: unknown): string {
   const { name, input } = block;
-  if (typeof input === "string") return renderPlain(input);
-  if (!isObject(input)) return input === null ? "" : renderPlain(JSON.stringify(input, null, 2));
+  if (typeof input === "string") return renderJsonOrPlain(input);
+  if (!isObject(input)) return input === null ? "" : renderJson(input);
   switch (name) {
     case "Bash": {
-      const parts = [renderPlain(field(input, "command") ?? "")];
+      const parts = [renderCode(field(input, "command") ?? "", "bash")];
       const description = field(input, "description");
       if (description) parts.unshift(caption(description));
       const rest = keyValue(input, new Set(["command", "description"]));
@@ -115,7 +118,7 @@ export function renderToolInput(block: ToolUseBlock, resultDetails: unknown): st
     case "shell_command":
     case "local_shell": {
       const cmd = field(input, "command") ?? (Array.isArray(input.command) ? input.command.join(" ") : "");
-      return renderPlain(cmd) + keyValue(input, new Set(["command"]));
+      return renderCode(cmd, "bash") + keyValue(input, new Set(["command"]));
     }
     case "Edit": {
       const patch = structuredPatch(resultDetails);
@@ -126,8 +129,18 @@ export function renderToolInput(block: ToolUseBlock, resultDetails: unknown): st
         keyValue(input, new Set(["file_path", "old_string", "new_string"]))
       );
     }
-    case "Write":
-      return caption(field(input, "file_path") ?? "") + renderPlain(field(input, "content") ?? "");
+    case "Write": {
+      const path = field(input, "file_path") ?? "";
+      return caption(path) + renderCode(field(input, "content") ?? "", languageForPath(path));
+    }
+    case "NotebookEdit": {
+      const language = field(input, "cell_type") === "markdown" ? "markdown" : "python";
+      return (
+        caption(field(input, "notebook_path") ?? "") +
+        renderCode(field(input, "new_source") ?? "", language) +
+        keyValue(input, new Set(["notebook_path", "new_source"]))
+      );
+    }
     case "apply_patch":
       return renderDiff(field(input, "input") ?? "");
     case "Agent": {
@@ -154,9 +167,13 @@ export function renderToolInput(block: ToolUseBlock, resultDetails: unknown): st
   }
 }
 
-export function renderToolResult(block: ToolResultBlock): string {
+/**
+ * Result text is shown as code when the call tells us what it is (a `Read` of a known file type keeps
+ * its line numbers in a gutter), as laid-out JSON when it parses as JSON, and as plain text otherwise.
+ */
+export function renderToolResult(block: ToolResultBlock, call: ToolUseBlock | null): string {
   const parts: string[] = [];
-  if (block.text.length > 0) parts.push(renderPlain(block.text));
+  if (block.text.length > 0) parts.push(resultText(block.text, call));
   for (const image of block.images) {
     parts.push(
       image.data
@@ -166,6 +183,14 @@ export function renderToolResult(block: ToolResultBlock): string {
   }
   if (parts.length === 0) parts.push('<div class="caption">(empty result)</div>');
   return parts.join("");
+}
+
+function resultText(text: string, call: ToolUseBlock | null): string {
+  if (call?.name === "Read") {
+    const numbered = renderNumberedLines(text, languageForPath(field(call.input, "file_path") ?? ""));
+    if (numbered !== null) return numbered;
+  }
+  return renderJsonOrPlain(text);
 }
 
 export function resultDetailsHtml(details: unknown): string | null {

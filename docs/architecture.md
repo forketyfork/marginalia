@@ -98,3 +98,13 @@ out of user messages into collapsible boxes before Markdown rendering. Tool call
 input rendering for the common cases (shell commands, file edits as diffs, file writes, subagent
 prompts, todo lists) and a key/value fallback for the rest. Entries use `content-visibility: auto` so
 long sessions stay responsive without a virtualized list.
+
+Code is highlighted with highlight.js from a fixed set of registered grammars; the language comes
+from the tool (shell commands), the file path (`Write` content, `Read` results) or the fence info
+string in Markdown. JSON in tool inputs, results and data blocks is laid out by a custom renderer
+rather than `JSON.stringify`: long or multi-line strings become indented `"""` blocks with their real
+line breaks, and a string that itself holds JSON is unfolded into nested JSON, so an MCP result that
+wraps a Markdown document in a field reads as the document. `Read` results keep their line numbers in
+a gutter drawn from a data attribute, so neither quotes nor copied text include them. Highlight spans
+change the DOM but not the text content that quotes anchor to; the JSON layout does change the text,
+so quotes anchor to the laid-out form.

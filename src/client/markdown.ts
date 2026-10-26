@@ -1,9 +1,7 @@
 import DOMPurify from "dompurify";
 import { Marked } from "marked";
-
-export function escapeHtml(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
+import { highlightCode, languageForFence } from "./code";
+import { escapeHtml } from "./html";
 
 /** Raw HTML in agent output is shown literally: `<system-reminder>` and friends are content, not markup. */
 const marked = new Marked({
@@ -12,6 +10,11 @@ const marked = new Marked({
   renderer: {
     html({ text }) {
       return escapeHtml(text);
+    },
+    code({ text, lang }) {
+      const language = languageForFence(lang ?? "");
+      const cls = `hljs${language ? ` language-${language}` : ""}`;
+      return `<pre><code class="${cls}">${highlightCode(text, language)}</code></pre>\n`;
     },
   },
 });
@@ -36,10 +39,6 @@ export function renderMarkdown(text: string): string {
   }
   cache.set(text, html);
   return html;
-}
-
-export function renderPlain(text: string): string {
-  return `<pre class="plain">${escapeHtml(text)}</pre>`;
 }
 
 /** Unified-diff style colouring for patches and edit previews. */

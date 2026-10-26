@@ -5,7 +5,10 @@ import { formatDuration, formatTime, formatTokens, preview } from "../../shared/
 import { segmentInjected } from "../../shared/injected";
 import { AGENT_LABEL, type Block, type Entry, type Transcript, textOfEntry } from "../../shared/model";
 import type { HighlightItem } from "../anchoring";
-import { escapeHtml, renderMarkdown, renderPlain } from "../markdown";
+import { escapeHtml, renderPlain } from "../html";
+import { renderJsonOrPlain } from "../json";
+import { renderMarkdown } from "../markdown";
+import { renderToolResult } from "../tools";
 import { AUX_KINDS, type PairedResult, toHighlight, type ViewOptions } from "../view";
 import { BlockView } from "./BlockView";
 import { ToolCallCard } from "./ToolCallCard";
@@ -223,7 +226,7 @@ export const EntryView = memo(function EntryView(props: EntryProps) {
                 entryId={entry.id}
                 blockIndex={i}
                 agentId={agentId}
-                html={renderPlain(text ?? block.text)}
+                html={renderToolResult({ ...block, text: text ?? block.text }, null)}
                 className="tool-result"
                 highlights={highlights}
                 onSelectAnnotation={onSelectAnnotation}
@@ -256,7 +259,7 @@ export const EntryView = memo(function EntryView(props: EntryProps) {
               entryId={entry.id}
               blockIndex={i}
               agentId={agentId}
-              html={renderPlain(text ?? block.text)}
+              html={renderJsonOrPlain(text ?? block.text)}
               highlights={highlights}
               onSelectAnnotation={onSelectAnnotation}
               onOrphans={onOrphans}

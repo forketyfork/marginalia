@@ -61,8 +61,8 @@ export function ToolCallCard(props: Props) {
   const inputHtml = useMemo(() => renderToolInput(block, result?.block.details ?? null), [block, result]);
   const resultHtml = useMemo(() => {
     if (!result) return "";
-    return renderToolResult(fullText === null ? result.block : { ...result.block, text: fullText });
-  }, [result, fullText]);
+    return renderToolResult(fullText === null ? result.block : { ...result.block, text: fullText }, block);
+  }, [result, fullText, block]);
   const detailsHtml = useMemo(() => (result ? resultDetailsHtml(result.block.details) : null), [result]);
 
   const isError = result?.block.isError ?? false;
