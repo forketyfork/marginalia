@@ -101,7 +101,10 @@ long sessions stay responsive without a virtualized list.
 
 Code is highlighted with highlight.js from a fixed set of registered grammars; the language comes
 from the tool (shell commands), the file path (`Write` content, `Read` results) or the fence info
-string in Markdown. JSON in tool inputs, results and data blocks is laid out by a custom renderer
+string in Markdown. A one-line shell command made of several statements is laid out one statement
+per line: a small scanner splits it at top-level `;` separators while respecting quotes,
+substitutions and comments, compound-command keywords take their own lines, and bodies are
+indented; the separators stay in the text, dimmed. JSON in tool inputs, results and data blocks is laid out by a custom renderer
 rather than `JSON.stringify`: long or multi-line strings become indented `"""` blocks with their real
 line breaks, and a string that itself holds JSON is unfolded into nested JSON, so an MCP result that
 wraps a Markdown document in a field reads as the document. `Read` results keep their line numbers in

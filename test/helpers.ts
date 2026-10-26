@@ -64,3 +64,13 @@ export function scratchDir(prefix: string): string {
   const base = resolve(import.meta.dir, "..", ".tmp");
   return mkdtempSync(join(base, `${prefix}-`));
 }
+
+/** The rendered text of an HTML fragment: what a reader sees and what quotes anchor to. */
+export const textOf = (html: string) =>
+  html
+    .replace(/<[^>]+>/g, "")
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");

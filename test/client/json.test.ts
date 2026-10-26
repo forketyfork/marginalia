@@ -1,14 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { renderJson, renderJsonOrPlain, tryParseJson } from "../../src/client/json";
 
-/** What a reader sees and what quotes anchor to: the rendered text without markup. */
-const textOf = (html: string) =>
-  html
-    .replace(/<[^>]+>/g, "")
-    .replace(/&quot;/g, '"')
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&");
+import { textOf } from "../helpers";
 
 describe("tryParseJson", () => {
   test("accepts objects and arrays only", () => {

@@ -8,14 +8,7 @@ import {
   splitHighlightedLines,
 } from "../../src/client/code";
 
-const textOf = (html: string) =>
-  html
-    .replace(/<[^>]+>/g, "")
-    .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&");
+import { textOf } from "../helpers";
 
 describe("language detection", () => {
   test("maps file paths by extension and by well-known name", () => {

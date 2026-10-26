@@ -1218,6 +1218,11 @@ mark.ann-focus {
   color: var(--fg);
 }
 
+/* One-line shell commands laid out one statement per line: the separators stay, dimmed */
+pre.code .sep {
+  color: var(--fg-muted);
+}
+
 /* Read results: line numbers live in a gutter outside the text */
 pre.code.numbered .ln {
   display: inline-block;

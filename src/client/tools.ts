@@ -4,6 +4,7 @@ import { languageForPath, renderCode, renderNumberedLines } from "./code";
 import { escapeHtml } from "./html";
 import { renderJson, renderJsonOrPlain } from "./json";
 import { renderDiff, renderMarkdown } from "./markdown";
+import { renderShellCommand, shellScript } from "./shell";
 import type { ToolResultBlock, ToolUseBlock } from "./view";
 
 const INLINE_LIMIT = 120;
@@ -14,6 +15,13 @@ function field(input: unknown, key: string): string | null {
   return typeof v === "string" ? v : null;
 }
 
+/** The command of a shell tool call: a string, or Codex's argv array shown as its script. */
+function shellCommand(input: unknown): string | null {
+  const text = field(input, "command");
+  if (text !== null) return text;
+  return isObject(input) && Array.isArray(input.command) ? shellScript(input.command) : null;
+}
+
 /** One line for the collapsed tool-call header. */
 export function toolSummary(block: ToolUseBlock): string {
   const { name, input } = block;
@@ -21,13 +29,10 @@ export function toolSummary(block: ToolUseBlock): string {
   switch (name) {
     case "Bash":
       return first(field(input, "command"));
+    case "shell":
     case "shell_command":
-    case "local_shell": {
-      const cmd =
-        field(input, "command") ??
-        (isObject(input) && Array.isArray(input.command) ? input.command.join(" ") : null);
-      return first(cmd);
-    }
+    case "local_shell":
+      return first(shellCommand(input));
     case "Read":
     case "Edit":
     case "Write":
@@ -108,18 +113,17 @@ export function renderToolInput(block: ToolUseBlock, resultDetails: unknown): st
   if (!isObject(input)) return input === null ? "" : renderJson(input);
   switch (name) {
     case "Bash": {
-      const parts = [renderCode(field(input, "command") ?? "", "bash")];
+      const parts = [renderShellCommand(field(input, "command") ?? "")];
       const description = field(input, "description");
       if (description) parts.unshift(caption(description));
       const rest = keyValue(input, new Set(["command", "description"]));
       if (rest) parts.push(rest);
       return parts.join("");
     }
+    case "shell":
     case "shell_command":
-    case "local_shell": {
-      const cmd = field(input, "command") ?? (Array.isArray(input.command) ? input.command.join(" ") : "");
-      return renderCode(cmd, "bash") + keyValue(input, new Set(["command"]));
-    }
+    case "local_shell":
+      return renderShellCommand(shellCommand(input) ?? "") + keyValue(input, new Set(["command"]));
     case "Edit": {
       const patch = structuredPatch(resultDetails);
       const diff = patch ?? editDiff(field(input, "old_string") ?? "", field(input, "new_string") ?? "");
