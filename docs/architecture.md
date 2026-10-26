@@ -108,7 +108,11 @@ from the tool (shell commands), the file path (`Write` content, `Read` results) 
 string in Markdown. A one-line shell command made of several statements is laid out one statement
 per line: a small scanner splits it at top-level `;` separators while respecting quotes,
 substitutions and comments, compound-command keywords take their own lines, and bodies are
-indented; the separators stay in the text, dimmed. JSON in tool inputs, results and data blocks is laid out by a custom renderer
+indented; the separators stay in the text, dimmed. The same scanner finds here-documents in multi-line
+commands and in `bash` fences: each body is highlighted in the language of what reads it (an
+interpreter taking its program from stdin, a database client, the file a `cat` or `tee` writes), the
+operator and the terminator line are dimmed, and the shell lines around a body are highlighted in one
+pass with the operators masked, so quoting that spans the body keeps its context. JSON in tool inputs, results and data blocks is laid out by a custom renderer
 rather than `JSON.stringify`: long or multi-line strings become indented `"""` blocks with their real
 line breaks, and a string that itself holds JSON is unfolded into nested JSON, so an MCP result that
 wraps a Markdown document in a field reads as the document. `Read` results keep their line numbers in

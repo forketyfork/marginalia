@@ -2,6 +2,7 @@ import DOMPurify from "dompurify";
 import { Marked, type TokenizerAndRendererExtension } from "marked";
 import { highlightCode, languageForFence } from "./code";
 import { escapeHtml, markPseudoTags, PSEUDO_TAG, PSEUDO_TAG_AT_START } from "./html";
+import { highlightShell } from "./shell";
 
 /**
  * Emphasis tags are tokenized ahead of marked's own inline HTML rule, so names with underscores,
@@ -39,7 +40,7 @@ const marked: Marked = new Marked({
     code({ text, lang }) {
       const language = languageForFence(lang ?? "");
       const cls = `hljs${language ? ` language-${language}` : ""}`;
-      return `<pre><code class="${cls}">${highlightCode(text, language)}</code></pre>\n`;
+      return `<pre><code class="${cls}">${language === "bash" ? highlightShell(text) : highlightCode(text, language)}</code></pre>\n`;
     },
   },
 });

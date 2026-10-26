@@ -36,7 +36,9 @@ Open http://127.0.0.1:4747. The first start indexes the whole session history (a
   order. Tool calls are collapsed to one line (tool, summary, status, duration); click to expand the
   input and result. Shell commands, file contents and Markdown code fences are syntax-highlighted,
   and a one-line shell command made of several statements is shown one statement per line with loop
-  and branch bodies indented. JSON inputs and results are laid out for reading, with long text fields
+  and branch bodies indented. A here-document is highlighted in the language of the command that
+  reads it: Python fed to `python3 - <<'EOF'`, SQL piped into `psql`, or the file that
+  `cat > app.py <<EOF` writes. JSON inputs and results are laid out for reading, with long text fields
   shown as indented blocks and JSON-in-a-string unfolded. Emphasis tags such as `<IMPORTANT>` are
   highlighted wherever they appear. Injected context (`<system-reminder>`, hook output, skill
   listings, compaction summaries, slash commands) is shown as dimmed one-liners that expand on click,

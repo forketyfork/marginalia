@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { layoutShell, renderShellCommand, shellScript } from "../../src/client/shell";
+import { findHeredocs, layoutShell, renderShellCommand, shellScript } from "../../src/client/shell";
 import { textOf } from "../helpers";
 
 const laidOut = (command: string) => {
@@ -43,12 +43,14 @@ describe("layoutShell", () => {
 
   test("leaves separators inside quotes, substitutions, expansions, subshells and comments alone", () => {
     const command =
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: shell parameter expansion, not a template
       "echo \"a; b\"; echo 'c; d'; echo $(a; b); x=${y//;/,}; find . -exec rm {} \\;; (cd a; make); echo `a; b`; echo $'x;y' # trailing; comment";
     expect(laidOut(command)).toBe(
       [
         'echo "a; b";',
         "echo 'c; d';",
         "echo $(a; b);",
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: shell parameter expansion, not a template
         "x=${y//;/,};",
         "find . -exec rm {} \\;;",
         "(cd a; make);",
@@ -98,5 +100,118 @@ describe("shellScript", () => {
     expect(shellScript(["/bin/zsh", "-c", "pwd"])).toBe("pwd");
     expect(shellScript(["cat", "README.md"])).toBe("cat README.md");
     expect(shellScript(["bash", "-lc", "x", "extra"])).toBe("bash -lc x extra");
+  });
+});
+
+describe("findHeredocs", () => {
+  test("locates bodies and terminators, with <<- tabs and several documents on one line", () => {
+    const command = [
+      "cat <<-EOF > a.py",
+      "\tx = 1",
+      "\tEOF",
+      "diff <(cat <<A) <(cat <<B)",
+      "1",
+      "A",
+      "2",
+      "B",
+      "echo done",
+    ].join("\n");
+    const docs = findHeredocs(command);
+    expect(
+      docs.map((d) => [d.line, d.start, d.delimiter, d.bodyFrom, d.bodyTo, d.terminator, d.language]),
+    ).toEqual([
+      [0, 4, "EOF", 1, 2, 2, "python"],
+      [3, 11, "A", 4, 5, 5, null],
+      [3, 22, "B", 6, 7, 7, null],
+    ]);
+  });
+
+  test("ignores here-strings, arithmetic shifts, quoted text and an operator nothing follows", () => {
+    expect(findHeredocs('python3 - <<< "print(1)"\necho $((1<<2))\necho "a <<EOF"\nEOF')).toEqual([]);
+    expect(findHeredocs("cat <<EOF")).toEqual([]);
+  });
+
+  test("runs an unterminated body to the end of the command", () => {
+    const docs = findHeredocs("python3 - <<'EOF'\nprint(1)\nprint(2)");
+    expect(docs.map((d) => [d.bodyFrom, d.bodyTo, d.terminator])).toEqual([[1, 3, null]]);
+  });
+});
+
+describe("heredoc language", () => {
+  const language = (line: string) => findHeredocs(`${line}\nx\nEOF`)[0]?.language ?? null;
+
+  test("comes from the interpreter that reads its program from stdin", () => {
+    expect(language("python3 - <<'EOF'")).toBe("python");
+    expect(language("python3.12 <<EOF 2>&1 | tail -5")).toBe("python");
+    expect(language("FOO=1 uv run python - <<EOF")).toBe("python");
+    expect(language("node --input-type=module - <<EOF")).toBe("javascript");
+    expect(language("deno run - <<EOF")).toBe("typescript");
+    expect(language("ruby <<EOF")).toBe("ruby");
+    expect(language("bash -s <<EOF")).toBe("bash");
+    expect(language("bash -e <<EOF")).toBe("bash");
+    expect(language("result=$(python3 - <<EOF")).toBe("python");
+  });
+
+  test("is unknown when the program comes from a file or the command line", () => {
+    expect(language("python3 script.py <<EOF")).toBeNull();
+    expect(language("python3 -c 'import sys' <<EOF")).toBeNull();
+    expect(language("node -e 'x' <<EOF")).toBeNull();
+    expect(language("bash -c 'read x' <<EOF")).toBeNull();
+    expect(language("git commit -m \"$(cat <<'EOF'")).toBeNull();
+  });
+
+  test("comes from database clients, kubectl manifests and jq input", () => {
+    expect(language("sudo -u postgres psql mydb <<EOF")).toBe("sql");
+    expect(language("sqlite3 app.db <<EOF")).toBe("sql");
+    expect(language("kubectl apply -f - <<EOF")).toBe("yaml");
+    expect(language("kubectl get pods <<EOF")).toBeNull();
+    expect(language("jq . <<EOF")).toBe("json");
+  });
+
+  test("comes from the name of the file cat or tee writes, directly or through a pipe", () => {
+    expect(language("cat > src/app.py <<'EOF'")).toBe("python");
+    expect(language("cat <<EOF >> ~/.zshrc")).toBe("bash");
+    expect(language('cat <<EOF > "$HOME/.config/x/config.toml"')).toBe("ini");
+    expect(language("cat <<'EOF' | sudo tee /etc/nginx/nginx.conf")).toBe("ini");
+    expect(language("tee -a notes.md <<EOF")).toBe("markdown");
+    expect(language("cat <<EOF | python3 -")).toBe("python");
+    expect(language("cat <<EOF | python3 -c 'x'")).toBeNull();
+    expect(language("cat <<EOF")).toBeNull();
+  });
+});
+
+describe("renderShellCommand with here-documents", () => {
+  test("highlights the body in the language of the command reading it and dims the frame", () => {
+    const command = [
+      "python3 - <<'EOF'",
+      "import pathlib",
+      'p = pathlib.Path("x")',
+      "EOF",
+      'echo "exit=$?"',
+    ].join("\n");
+    const html = renderShellCommand(command);
+    expect(html).toContain('<span class="hljs-keyword">import</span>');
+    expect(html).toContain(`<span class="sep">&lt;&lt;'EOF'</span>`);
+    expect(html).toContain('<span class="sep">EOF</span>');
+    expect(html).toContain('<span class="hljs-built_in">echo</span>');
+    expect(textOf(html)).toBe(command);
+  });
+
+  test("keeps quoting context across a body and leaves a body of unknown language plain", () => {
+    const command = ["git commit -m \"$(cat <<'EOF'", "Add thing", "", "import nothing", "EOF", ')"'].join(
+      "\n",
+    );
+    const html = renderShellCommand(command);
+    const lines = html.replace(/^<pre[^>]*>|<\/pre>$/g, "").split("\n");
+    expect(lines[1]).toBe("Add thing");
+    expect(lines[3]).toBe("import nothing");
+    expect(lines[5]).toContain("hljs-string");
+    expect(textOf(html)).toBe(command);
+  });
+
+  test("does not let an unquoted delimiter swallow the rest of the command as a string", () => {
+    const html = renderShellCommand(["cat <<EOF > out.py", "print(1)", "EOF", "echo done"].join("\n"));
+    expect(html).toContain('<span class="hljs-built_in">print</span>');
+    expect(html).toContain('<span class="hljs-built_in">echo</span>');
   });
 });

@@ -31,3 +31,11 @@ describe("parseMarkdown", () => {
     );
   });
 });
+
+describe("parseMarkdown code fences", () => {
+  test("highlights here-document bodies in bash fences in their own language", () => {
+    const html = parseMarkdown("```bash\npython3 - <<'EOF'\nimport os\nEOF\n```");
+    expect(html).toContain('<span class="hljs-keyword">import</span>');
+    expect(html).toContain('<span class="sep">EOF</span>');
+  });
+});
