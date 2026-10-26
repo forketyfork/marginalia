@@ -356,6 +356,7 @@ pre.plain {
 
 .session-list {
   flex: 1;
+  position: relative;
   overflow-y: auto;
 }
 
@@ -718,7 +719,7 @@ pre.plain {
 }
 
 .injected.open .injected-body {
-  display: block;
+  display: grid;
 }
 
 .cmd {
@@ -1229,6 +1230,63 @@ pre.code.numbered .ln::before {
 }
 
 /*
+ * Motion. Anything that opens grows from zero height: the `reveal` wrapper is a grid whose single row
+ * animates from 0fr to 1fr on mount, so a tool body, a context entry, a data block or the composer
+ * unfolds instead of popping in. Session rows slide to their new place from script when a refresh
+ * reorders the list, and a row whose session changed flashes.
+ */
+.reveal {
+  display: grid;
+  animation: reveal 220ms ease-out;
+}
+
+.reveal > * {
+  min-height: 0;
+  animation: reveal-clip 220ms;
+}
+
+@keyframes reveal {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+
+@keyframes reveal-clip {
+  from,
+  to {
+    overflow: hidden;
+  }
+}
+
+.session-row.touched {
+  animation: touched 1200ms ease-out;
+}
+
+@keyframes touched {
+  from {
+    background-color: color-mix(in srgb, var(--accent) 24%, transparent);
+  }
+}
+
+.tool-actions,
+.entry-head .annotate {
+  transition: opacity 150ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal > *,
+  .session-row.touched {
+    animation: none;
+  }
+}
+
+/*
  * The Sprawl, dark mode only. Static drifts over the page and scanlines cross it; neon goes on the
  * things you act on (borders, badges, chips, marks, the brand) and never on body text, which stays
  * unlit so it remains readable. Motion stops under prefers-reduced-motion.
@@ -1281,21 +1339,13 @@ pre.code.numbered .ln::before {
     }
   }
 
-  @keyframes neon-flicker {
-    0%,
-    18%,
-    22%,
-    25%,
-    53%,
-    57%,
-    100% {
-      opacity: 1;
-    }
-    20%,
-    24%,
-    55% {
-      opacity: 0.5;
-      text-shadow: none;
+  @keyframes neon-pulse {
+    to {
+      opacity: 0.86;
+      text-shadow:
+        0 0 1px #fff,
+        0 0 3px var(--neon-cyan),
+        0 0 10px rgba(25, 230, 255, 0.3);
     }
   }
 
@@ -1333,7 +1383,7 @@ pre.code.numbered .ln::before {
       0 0 1px #fff,
       0 0 6px var(--neon-cyan),
       0 0 18px rgba(25, 230, 255, 0.55);
-    animation: neon-flicker 11s infinite;
+    animation: neon-pulse 4s ease-in-out infinite alternate;
   }
 
   .brand:hover {

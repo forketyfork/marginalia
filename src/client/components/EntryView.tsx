@@ -42,7 +42,7 @@ export function textHtml(text: string): string {
         case "command-args":
           return seg.text.trim() ? `<div class="cmd-args">${escapeHtml(seg.text.trim())}</div>` : "";
         default:
-          return `<div class="injected"><div class="injected-head" data-tag="${escapeHtml(seg.tag)}"></div><div class="injected-body">${renderPlain(seg.text.trim())}</div></div>`;
+          return `<div class="injected"><div class="injected-head" data-tag="${escapeHtml(seg.tag)}"></div><div class="injected-body reveal"><div>${renderPlain(seg.text.trim())}</div></div></div>`;
       }
     })
     .join("");
@@ -255,20 +255,22 @@ export const EntryView = memo(function EntryView(props: EntryProps) {
               {block.label}
               <BlockChips chips={chips} onSelect={onSelectAnnotation} />
             </summary>
-            <BlockView
-              entryId={entry.id}
-              blockIndex={i}
-              agentId={agentId}
-              html={renderJsonOrPlain(text ?? block.text)}
-              highlights={highlights}
-              onSelectAnnotation={onSelectAnnotation}
-              onOrphans={onOrphans}
-            />
-            {block.truncated && text === undefined && (
-              <button type="button" className="link" onClick={() => void loadBlock(i)}>
-                Show all {block.fullLength.toLocaleString("en-US")} characters
-              </button>
-            )}
+            <div className="reveal">
+              <BlockView
+                entryId={entry.id}
+                blockIndex={i}
+                agentId={agentId}
+                html={renderJsonOrPlain(text ?? block.text)}
+                highlights={highlights}
+                onSelectAnnotation={onSelectAnnotation}
+                onOrphans={onOrphans}
+              />
+              {block.truncated && text === undefined && (
+                <button type="button" className="link" onClick={() => void loadBlock(i)}>
+                  Show all {block.fullLength.toLocaleString("en-US")} characters
+                </button>
+              )}
+            </div>
           </details>
         );
     }
@@ -326,7 +328,12 @@ export const EntryView = memo(function EntryView(props: EntryProps) {
           annotate
         </button>
       </header>
-      {(!isAux || auxOpen) && <div className="entry-body">{entry.blocks.map(renderBlock)}</div>}
+      {!isAux && <div className="entry-body">{entry.blocks.map(renderBlock)}</div>}
+      {isAux && auxOpen && (
+        <div className="reveal">
+          <div className="entry-body">{entry.blocks.map(renderBlock)}</div>
+        </div>
+      )}
     </article>
   );
 });

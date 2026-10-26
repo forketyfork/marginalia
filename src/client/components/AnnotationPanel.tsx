@@ -70,27 +70,29 @@ export function AnnotationPanel(props: Props) {
         </label>
       </div>
       {composer && (
-        <div className="composer">
-          <div className="section-label">New annotation · {targetLabel(composer.target)}</div>
-          <AnnotationForm
-            initial={{ kind: rememberedKind(), note: "", tags: [] }}
-            excerpt={composer.context || null}
-            submitLabel="Save"
-            onSubmit={async (v) => {
-              await api.createAnnotation({
-                agent,
-                sessionId,
-                target: composer.target,
-                kind: v.kind,
-                note: v.note,
-                tags: v.tags,
-                context: composer.context,
-              });
-              onCloseComposer();
-              await onChanged();
-            }}
-            onCancel={onCloseComposer}
-          />
+        <div className="reveal">
+          <div className="composer">
+            <div className="section-label">New annotation · {targetLabel(composer.target)}</div>
+            <AnnotationForm
+              initial={{ kind: rememberedKind(), note: "", tags: [] }}
+              excerpt={composer.context || null}
+              submitLabel="Save"
+              onSubmit={async (v) => {
+                await api.createAnnotation({
+                  agent,
+                  sessionId,
+                  target: composer.target,
+                  kind: v.kind,
+                  note: v.note,
+                  tags: v.tags,
+                  context: composer.context,
+                });
+                onCloseComposer();
+                await onChanged();
+              }}
+              onCancel={onCloseComposer}
+            />
+          </div>
         </div>
       )}
       {!composer && annotations.length === 0 && (

@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { ANNOTATION_KINDS, type AnnotationKind, KIND_META } from "../../shared/annotation";
 import { formatCost, formatRelative, shortenPath } from "../../shared/format";
 import { AGENT_LABEL, AGENTS, type Agent, type SessionSummary, SOURCE_LABEL } from "../../shared/model";
+import { planRowMotion, type RowLayout } from "../motion";
 import { routeToHash } from "../router";
 
 export interface SessionFilters {
@@ -32,6 +33,14 @@ function toggle<T>(list: T[], item: T): T[] {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
 
+/** Rows this close to the visible part of the list animate; the rest simply take their new place. */
+const VIEW_MARGIN = 200;
+const MOVE_MS = 320;
+
+function reducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 function dayLabel(ms: number, now: Date): string {
   const d = new Date(ms);
   const sameDay = (a: Date, b: Date) =>
@@ -50,6 +59,49 @@ function dayLabel(ms: number, now: Date): string {
 
 export function SessionList({ sessions, filters, onFilters, error, selected }: Props) {
   const searchRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const layout = useRef<RowLayout[] | null>(null);
+
+  /**
+   * A refresh reorders the list: rows slide from where they were to where they are (FLIP), new rows
+   * fade in, and a row whose session changed flashes. Only rows near the viewport animate. The first
+   * paint and a narrowed filter (some rows gone) show the new list at once.
+   */
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list || sessions === null) return;
+    const updatedAt = new Map(sessions.map((s) => [`${s.agent}:${s.id}`, s.updatedAt]));
+    const rows = new Map(
+      [...list.querySelectorAll<HTMLElement>("[data-key]")].map((row) => [row.dataset.key ?? "", row]),
+    );
+    const after = [...rows].map(([key, row]) => ({
+      key,
+      top: row.offsetTop,
+      updatedAt: updatedAt.get(key) ?? 0,
+    }));
+    const view = {
+      low: list.scrollTop - VIEW_MARGIN,
+      high: list.scrollTop + list.clientHeight + VIEW_MARGIN,
+    };
+    const plan = planRowMotion(layout.current, after, view);
+    layout.current = after;
+    if (plan === null || reducedMotion()) return;
+    const timing = { duration: MOVE_MS, easing: "ease-out" };
+    for (const motion of plan) {
+      const row = rows.get(motion.key);
+      if (!row) continue;
+      if (motion.appear) row.animate([{ opacity: 0 }, { opacity: 1 }], timing);
+      if (motion.slide !== null)
+        row.animate([{ transform: `translateY(${motion.slide}px)` }, { transform: "none" }], timing);
+      if (motion.changed) {
+        const link = row.querySelector<HTMLElement>(".session-row");
+        if (link) {
+          link.classList.add("touched");
+          link.addEventListener("animationend", () => link.classList.remove("touched"), { once: true });
+        }
+      }
+    }
+  }, [sessions]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -123,7 +175,7 @@ export function SessionList({ sessions, filters, onFilters, error, selected }: P
           </button>
         </div>
       </div>
-      <div className="session-list">
+      <div className="session-list" ref={listRef}>
         {error && <div className="error">{error}</div>}
         {sessions === null && !error && <div className="muted pad">Loading…</div>}
         {sessions && sessions.length === 0 && <div className="muted pad">No sessions match.</div>}
@@ -134,7 +186,7 @@ export function SessionList({ sessions, filters, onFilters, error, selected }: P
           const isSelected = selected?.agent === s.agent && selected.id === s.id;
           const total = Object.values(s.annotations).reduce((a, b) => a + b, 0);
           return (
-            <div key={`${s.agent}:${s.id}`}>
+            <div key={`${s.agent}:${s.id}`} data-key={`${s.agent}:${s.id}`}>
               {header}
               <a
                 className={`session-row${isSelected ? " selected" : ""}`}
