@@ -1,7 +1,8 @@
 # Marginalia
 
-Local reader and annotator for Claude Code, Codex, and Gemini CLI session transcripts. Bun +
-TypeScript + React, SQLite via `bun:sqlite`, no build step beyond Bun's HTML bundling.
+Local reader and annotator for Claude Code, Claude Cowork, Codex, and Gemini CLI session
+transcripts. Bun + TypeScript + React, SQLite via `bun:sqlite`, no build step beyond Bun's HTML
+bundling.
 
 ## Commands
 

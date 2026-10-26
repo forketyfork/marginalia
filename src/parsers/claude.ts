@@ -71,7 +71,7 @@ export function parseClaude(text: string, opts: ClaudeOptions): Transcript {
   let legacySummary: string | null = null;
   let firstPrompt: string | null = null;
   let firstCommand: string | null = null;
-  let current: { entry: Entry; messageId: string } | null = null;
+  let current: AssistantCursor = null;
 
   for (const { line, value } of parsed.lines) {
     const type = str(value, "type");
@@ -146,7 +146,7 @@ function noteEnvelope(b: TranscriptBuilder, value: JsonObject): void {
   if (version) b.versions.add(version);
 }
 
-function noteCost(b: TranscriptBuilder, value: JsonObject): void {
+export function noteCost(b: TranscriptBuilder, value: JsonObject): void {
   b.costUsd = num(value, "totalCostUSD") ?? b.costUsd;
   const usage = obj(value, "modelUsage");
   if (!usage) return;
@@ -162,13 +162,16 @@ function noteCost(b: TranscriptBuilder, value: JsonObject): void {
   b.totalTokens = total;
 }
 
-function addAssistant(
+/** The assistant entry still being streamed, so that the next line of the same API message joins it. */
+export type AssistantCursor = { entry: Entry; messageId: string } | null;
+
+export function addAssistant(
   b: TranscriptBuilder,
   value: JsonObject,
   line: number,
   timestamp: number | null,
-  current: { entry: Entry; messageId: string } | null,
-): { entry: Entry; messageId: string } | null {
+  current: AssistantCursor,
+): AssistantCursor {
   const uuid = str(value, "uuid") ?? `L${line}`;
   const message = obj(value, "message");
   if (!message) {
@@ -270,7 +273,12 @@ function parseUsage(usage: JsonObject | null): Usage | null {
   };
 }
 
-function addUser(b: TranscriptBuilder, value: JsonObject, line: number, timestamp: number | null): Entry {
+export function addUser(
+  b: TranscriptBuilder,
+  value: JsonObject,
+  line: number,
+  timestamp: number | null,
+): Entry {
   const uuid = str(value, "uuid") ?? `L${line}`;
   const message = obj(value, "message");
   const { blocks, toolResults } = userBlocks(message?.content, value.toolUseResult);

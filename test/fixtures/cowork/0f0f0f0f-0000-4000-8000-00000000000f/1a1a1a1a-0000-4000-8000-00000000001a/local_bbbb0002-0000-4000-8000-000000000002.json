@@ -1,0 +1,20 @@
+{
+  "sessionId": "local_bbbb0002-0000-4000-8000-000000000002",
+  "processName": "trusting-beautiful-ptolemy",
+  "cliSessionId": "dddd0004-0000-4000-8000-000000000004",
+  "cwd": "/Users/alice/Library/Application Support/Claude/local-agent-mode-sessions/0f0f0f0f-0000-4000-8000-00000000000f/1a1a1a1a-0000-4000-8000-00000000001a/local_bbbb0002-0000-4000-8000-000000000002/outputs",
+  "userSelectedFolders": [],
+  "createdAt": 1770666740000,
+  "lastActivityAt": 1770666760000,
+  "model": "claude-opus-4-5-20251101",
+  "isArchived": true,
+  "title": "Receipt scan",
+  "vmProcessName": "trusting-beautiful-ptolemy",
+  "hostLoopMode": false,
+  "initialMessage": "What is on this receipt?",
+  "systemPrompt": "You are Cowork.",
+  "error": "You've hit your limit · resets 11:10am",
+  "errorAt": 1770666759000,
+  "emailAddress": "alice@example.com",
+  "accountName": "Alice"
+}

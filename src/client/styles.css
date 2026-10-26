@@ -300,6 +300,9 @@ pre.plain {
 .chip.agent-claude.on {
   background: #c2410c;
 }
+.chip.agent-cowork.on {
+  background: #a21caf;
+}
 .chip.agent-codex.on {
   background: #0f766e;
 }
@@ -380,6 +383,9 @@ pre.plain {
 
 .badge.agent-claude {
   background: #c2410c;
+}
+.badge.agent-cowork {
+  background: #a21caf;
 }
 .badge.agent-codex {
   background: #0f766e;

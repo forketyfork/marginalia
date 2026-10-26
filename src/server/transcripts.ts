@@ -6,6 +6,7 @@ import type { Agent, Block, Transcript } from "../shared/model";
 import type { Catalog, SessionLocation } from "./catalog";
 import { loadGeminiProjects } from "./catalog";
 import type { Config } from "./config";
+import { CoworkSidecars, coworkMtimeMs, readCoworkSession } from "./cowork";
 import { readSessionText } from "./files";
 
 const CACHE_SIZE = 6;
@@ -14,6 +15,11 @@ const SUBAGENT_FILE = /^agent-([0-9a-f]+)\.jsonl(\.zst)?$/i;
 interface CacheEntry {
   mtimeMs: number;
   transcript: Transcript;
+}
+
+interface Source {
+  mtimeMs: number;
+  read: () => Promise<string>;
 }
 
 /**
@@ -33,7 +39,7 @@ export class TranscriptStore {
     if (!location) return null;
     const readable = readablePath(location);
     if (!readable) return null;
-    const parsed = await this.parse(agent, readable, location.path, null);
+    const parsed = await this.parse(agent, readable, location.path, null, readable === location.path);
     if (!parsed) return null;
     const transcript: Transcript = {
       ...parsed,
@@ -75,25 +81,26 @@ export class TranscriptStore {
     readable: string,
     displayPath: string,
     agentId: string | null,
+    live = false,
   ): Promise<Transcript | null> {
-    let mtimeMs: number;
+    let source: Source;
     try {
-      mtimeMs = Math.round((await stat(readable)).mtimeMs);
+      source = await openSource(agent, readable, live);
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code === "ENOENT") return null;
       throw err;
     }
     const cached = this.cache.get(readable);
-    if (cached && cached.mtimeMs === mtimeMs) {
+    if (cached && cached.mtimeMs === source.mtimeMs) {
       this.cache.delete(readable);
       this.cache.set(readable, cached);
       return cached.transcript;
     }
-    const text = await readSessionText(readable);
+    const text = await source.read();
     const geminiProjects =
       agent === "gemini" ? await loadGeminiProjects(this.config.geminiProjectsPath) : new Map();
     const transcript = parseTranscript(agent, text, { path: displayPath, geminiProjects, agentId });
-    this.cache.set(readable, { mtimeMs, transcript });
+    this.cache.set(readable, { mtimeMs: source.mtimeMs, transcript });
     while (this.cache.size > CACHE_SIZE) {
       const oldest = this.cache.keys().next().value;
       if (oldest === undefined) break;
@@ -146,6 +153,21 @@ export class TranscriptStore {
       }
     }
   }
+}
+
+/**
+ * A live Cowork session is two files (audit log and sidecar) composed on read, exactly as the
+ * catalog composed them for the archive; everything else is a single file.
+ */
+async function openSource(agent: Agent, readable: string, live: boolean): Promise<Source> {
+  if (agent === "cowork" && live) {
+    const sidecar = await new CoworkSidecars().locate(readable);
+    return {
+      mtimeMs: await coworkMtimeMs(readable, sidecar),
+      read: async () => (await readCoworkSession(readable, sidecar)).text,
+    };
+  }
+  return { mtimeMs: Math.round((await stat(readable)).mtimeMs), read: () => readSessionText(readable) };
 }
 
 function readablePath(location: SessionLocation): string | null {

@@ -9,7 +9,8 @@ import type { AnnotationCounts, AnnotationKind } from "../shared/annotation";
 import type { Agent, CatalogStatus, SessionSource, SessionSummary } from "../shared/model";
 import { Archive, type ArchivedSession } from "./archive";
 import type { Config } from "./config";
-import { isSessionFile, readSessionBytes, readSessionText } from "./files";
+import { CoworkSidecars, coworkMtimeMs, findCoworkAudits, readCoworkSession } from "./cowork";
+import { isSessionFile, readSessionBytes, readSessionText, type SessionBytes } from "./files";
 import { groupHistory, hasRealPrompt, historyToClaudeJsonl, parseHistory } from "./history";
 import { readLegacyStore } from "./legacy-store";
 
@@ -21,7 +22,10 @@ const log = {
 export interface DiscoveredFile {
   agent: Agent;
   path: string;
+  /** Newest modification time of the session's files. */
   mtimeMs: number;
+  /** Cowork sessions pair the audit log with the app's metadata sidecar, when the app wrote one. */
+  companion: string | null;
 }
 
 export interface RefreshStats {
@@ -106,7 +110,7 @@ export async function discoverFiles(config: Config): Promise<DiscoveredFile[]> {
   const isRollout = (name: string) => name.startsWith("rollout-") && isSessionFile(name);
   const isClaude = (rel: string, name: string) => isSessionFile(name) && !rel.includes("/subagents/");
   const claudeRoots = [config.claudeRoot, ...config.claudeExtraRoots];
-  const [claudeLists, codexLive, codexArchived, gemini] = await Promise.all([
+  const [claudeLists, codexLive, codexArchived, gemini, coworkAudits] = await Promise.all([
     Promise.all(claudeRoots.map((root) => walk(root, isClaude))),
     walk(config.codexRoot, (_rel, name) => isRollout(name)),
     walk(config.codexArchivedRoot, (_rel, name) => isRollout(name)),
@@ -114,6 +118,7 @@ export async function discoverFiles(config: Config): Promise<DiscoveredFile[]> {
       config.geminiRoot,
       (rel, name) => rel.includes("/chats/") && name.startsWith("session-") && isSessionFile(name),
     ),
+    findCoworkAudits(config.coworkRoot),
   ]);
   const tagged: Array<[Agent, string[]]> = [
     ["claude", claudeLists.flat()],
@@ -125,10 +130,23 @@ export async function discoverFiles(config: Config): Promise<DiscoveredFile[]> {
     const stats = await Promise.all(paths.map((p) => stat(p)));
     paths.forEach((path, i) => {
       const s = stats[i];
-      if (s) files.push({ agent, path, mtimeMs: Math.round(s.mtimeMs) });
+      if (s) files.push({ agent, path, mtimeMs: Math.round(s.mtimeMs), companion: null });
     });
   }
+  const sidecars = new CoworkSidecars();
+  for (const path of coworkAudits) {
+    try {
+      const companion = await sidecars.locate(path);
+      files.push({ agent: "cowork", path, mtimeMs: await coworkMtimeMs(path, companion), companion });
+    } catch (err) {
+      log.warn(`skipping ${path}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
   return files;
+}
+
+function readDiscovered(file: DiscoveredFile): Promise<SessionBytes> {
+  return file.agent === "cowork" ? readCoworkSession(file.path, file.companion) : readSessionBytes(file.path);
 }
 
 /** Gemini keys sessions by SHA-256 of the project directory; `projects.json` maps directory → short name. */
@@ -233,7 +251,7 @@ export class Catalog {
     const geminiProjects = await loadGeminiProjects(this.config.geminiProjectsPath);
     for (const file of pending) {
       try {
-        const { bytes, text, compressed } = await readSessionBytes(file.path);
+        const { bytes, text, compressed } = await readDiscovered(file);
         const transcript = parseTranscript(file.agent, text, { path: file.path, geminiProjects });
         const archivePath = await this.archive.writeSession(file.agent, transcript.id, bytes, compressed, {
           sourcePath: file.path,

@@ -1,0 +1,29 @@
+{
+  "sessionId": "local_aaaa0001-0000-4000-8000-000000000001",
+  "processName": "quiet-bold-hopper",
+  "cliSessionId": "cccc0003-0000-4000-8000-000000000003",
+  "cwd": "/Users/alice/Library/Application Support/Claude/local-agent-mode-sessions/0f0f0f0f-0000-4000-8000-00000000000f/1a1a1a1a-0000-4000-8000-00000000001a/aaaa0001/outputs",
+  "userSelectedFolders": ["/Users/alice/Notes"],
+  "createdAt": 1792560240000,
+  "lastActivityAt": 1792560460000,
+  "model": "claude-opus-5-5",
+  "isArchived": false,
+  "isStarred": true,
+  "title": "Slack digest",
+  "vmProcessName": "quiet-bold-hopper",
+  "hostLoopMode": true,
+  "sessionType": "scheduled",
+  "scheduledTaskId": "slack-fetch",
+  "permissionMode": "auto",
+  "initialMessage": "Summarize what people asked me on Slack this week.",
+  "systemPrompt": "You are Cowork, running inside the Claude desktop app.",
+  "slashCommands": ["anthropic-skills:docx", "anthropic-skills:pdf"],
+  "enabledMcpTools": { "local:Filesystem:read_file": false, "remote:Slack:search": true },
+  "remoteMcpServersConfig": [
+    { "uuid": "mcp-1", "name": "Slack", "url": "https://mcp.example.com/mcp", "tools": [] }
+  ],
+  "emailAddress": "alice@example.com",
+  "accountName": "Alice",
+  "egressAllowedDomains": ["example.com"],
+  "memoryEnabled": true
+}

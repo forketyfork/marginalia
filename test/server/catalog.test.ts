@@ -54,8 +54,8 @@ describe("Catalog", () => {
   test("indexes incrementally by mtime and marks vanished files missing", async () => {
     const catalog = new Catalog(openDatabase(":memory:"), config());
     const first = await catalog.refresh();
-    expect(first).toMatchObject({ added: 7, updated: 0, missing: 0, errors: 0 });
-    expect(catalog.status()).toMatchObject({ indexing: false, sessions: 7, errors: 0 });
+    expect(first).toMatchObject({ added: 9, updated: 0, missing: 0, errors: 0 });
+    expect(catalog.status()).toMatchObject({ indexing: false, sessions: 9, errors: 0 });
 
     const second = await catalog.refresh();
     expect(second).toMatchObject({ added: 0, updated: 0, missing: 0 });
@@ -83,7 +83,16 @@ describe("Catalog", () => {
       { q: "", agents: null, kinds: null, annotatedOnly: false, includeSubagents: false },
       new Map(),
     );
-    expect(all.map((s) => s.agent).sort()).toEqual(["claude", "codex", "codex", "codex", "codex", "gemini"]);
+    expect(all.map((s) => s.agent).sort()).toEqual([
+      "claude",
+      "codex",
+      "codex",
+      "codex",
+      "codex",
+      "cowork",
+      "cowork",
+      "gemini",
+    ]);
     expect(all.every((s) => s.subagent === null)).toBe(true);
     expect(all.map((s) => s.updatedAt)).toEqual([...all.map((s) => s.updatedAt)].sort((a, b) => b - a));
     expect(all.find((s) => s.agent === "claude")).toMatchObject({
@@ -142,7 +151,7 @@ describe("Catalog", () => {
     const catalog = new Catalog(openDatabase(":memory:"), fixtureConfig());
     const [a, b] = await Promise.all([catalog.refresh(), catalog.refresh()]);
     expect(a).toBe(b);
-    expect(a.added).toBe(7);
+    expect(a.added).toBe(9);
   });
 });
 

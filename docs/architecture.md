@@ -4,8 +4,8 @@
 
 One Bun process serves both the JSON API and the React client (bundled by Bun from
 `src/client/index.html` at startup, with hot module reload in development). State lives in a single
-SQLite file: annotations (user data) and a session index (a cache). Transcripts themselves are never
-copied; they are parsed from the agents' own files on demand.
+SQLite file: annotations (user data) and a session index (a cache). Transcripts are parsed on demand
+from the agents' own files while those exist, and from Marginalia's archived copy afterwards.
 
 ```
 src/shared/     types and pure logic used by both sides: transcript model, annotation model,
@@ -50,13 +50,18 @@ compressed Codex rollouts are copied byte for byte, and Claude subagent transcri
 `missing_since` instead of deleting them, the transcript store falls back to the archived copy, and an
 empty index table is repopulated from the archive directory. Reconstructed sessions (prompt history,
 legacy store, one-off salvage scripts) are written straight into the archive in Claude JSONL form and
-indexed like any other file, which keeps one parser and one read path for everything.
+indexed like any other file, which keeps one parser and one read path for everything. A Cowork
+session is two files on disk (the Agent SDK audit log and the desktop app's metadata sidecar); the
+catalog composes them into one JSONL stream, sidecar first as a `cowork_session` line, and archives
+that, so a live read and an archived read go through the same parser.
 
 ## Session catalog
 
 `Catalog` walks the agent roots (Claude has extra roots such as Xcode's agent config, Codex has a
-live and an archived one), compares file mtimes with the `sessions` table, and re-parses only changed
-files. Rows are never deleted; see the archive section. Concurrent refreshes share one in-flight run. The list endpoint waits briefly for an
+live and an archived one, Cowork's session directory is walked at its fixed depth because it also
+holds uploads and outputs), compares file mtimes with the `sessions` table, and re-parses only
+changed files; a Cowork session counts as changed when either of its two files does. Rows are never
+deleted; see the archive section. Concurrent refreshes share one in-flight run. The list endpoint waits briefly for an
 incremental refresh and otherwise serves what is indexed so far, while the client polls `/api/status`
 and reloads when indexing finishes. Search is a case-insensitive all-terms substring match over a
 per-session corpus (title, cwd, branch, id, and every user prompt), evaluated in process; at a few
@@ -68,7 +73,9 @@ Codex rollouts may be zstd-compressed in place or archived under a second root; 
 Sub-sessions (Codex guardian/review threads and spawned agents, identified by
 `session_meta.payload.source`) are indexed with a `subagent` label and a `parent_id`, hidden from
 the default list, and linked from their parent's header. Claude subagents are separate files under
-`<session>/subagents/` and are reached through the parent session, never listed on their own.
+`<session>/subagents/` and are reached through the parent session, never listed on their own. Cowork
+logs subagent traffic inline; lines carrying a `parent_tool_use_id` become sidechain entries of the
+same transcript.
 
 ## Annotations and anchoring
 

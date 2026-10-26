@@ -1,7 +1,8 @@
 # Marginalia
 
 A local reader and annotator for coding-agent session transcripts. It finds every Claude Code,
-Codex, and Gemini CLI session on the machine, renders each transcript in a readable form
+Claude Cowork (the desktop app's agent mode), Codex, and Gemini CLI session on the machine, renders
+each transcript in a readable form
 (prompts, assistant text, thinking when it was recorded, tool calls with their results, injected
 context, system events, subagents), and lets you attach annotations to any piece of it: a text
 selection, a message, a thought, a tool call, or a tool result.
@@ -67,6 +68,7 @@ Annotations can be marked resolved once you have acted on them; resolved ones st
 | `MARGINALIA_CLAUDE_EXTRA_ROOTS` | Xcode's Claude agent config | Colon-separated extra directories in the Claude layout |
 | `MARGINALIA_CLAUDE_HISTORY` | `~/.claude/history.jsonl` | Prompt history used to rebuild deleted sessions |
 | `MARGINALIA_CLAUDE_LEGACY_STORE` | `~/.claude/__store.db` | Spring-2025 message store, imported once |
+| `MARGINALIA_COWORK_ROOT` | `~/Library/Application Support/Claude/local-agent-mode-sessions` | Claude desktop app (Cowork) session logs and their sidecars |
 | `MARGINALIA_ARCHIVE_DIR` | `<data dir>/archive` | Marginalia's own copies of every transcript |
 | `MARGINALIA_CODEX_ROOT` | `~/.codex/sessions` | Codex rollout files, plain or zstd-compressed |
 | `MARGINALIA_CODEX_ARCHIVED_ROOT` | `~/.codex/archived_sessions` | Codex threads archived from the UI |
@@ -95,6 +97,13 @@ transcript header:
   Claude Code switched to JSONL files, marked "legacy store".
 - **Xcode's Claude agent** (`~/Library/Developer/Xcode/CodingAssistant/ClaudeAgentConfig/projects`):
   the same file format in a second location, indexed like the main one.
+
+Claude Cowork sessions are read from the desktop app's
+`~/Library/Application Support/Claude/local-agent-mode-sessions` directory, which has no documented
+retention either, so they are archived like everything else. Each session is an Agent SDK audit log
+plus a `local_<uuid>.json` sidecar holding the title you see in the app, the folders you granted,
+the system prompt, and whether the run was a scheduled task; Marginalia stores both as one
+transcript, and a renamed or starred session counts as updated.
 
 `scripts/import-fass-carve.ts` is a one-off that turns rows carved out of an old fass index with
 SQLite's `.recover` into archived prompt-only sessions; anything placed in the archive directory with

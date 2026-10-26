@@ -1,11 +1,12 @@
 import type { AnnotationCounts } from "./annotation";
 
-export type Agent = "claude" | "codex" | "gemini";
+export type Agent = "claude" | "cowork" | "codex" | "gemini";
 
-export const AGENTS: readonly Agent[] = ["claude", "codex", "gemini"];
+export const AGENTS: readonly Agent[] = ["claude", "cowork", "codex", "gemini"];
 
 export const AGENT_LABEL: Record<Agent, string> = {
   claude: "Claude Code",
+  cowork: "Cowork",
   codex: "Codex",
   gemini: "Gemini CLI",
 };

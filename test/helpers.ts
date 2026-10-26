@@ -26,6 +26,16 @@ export const CODEX_LEGACY_PATH = join(
   FIXTURES,
   "codex/sessions/2025/07/23/rollout-2025-07-23T07-35-58-0b5fd170-7c2a-4f91-92f4-95b754916ff6.jsonl",
 );
+export const COWORK_ACCOUNT = join(
+  FIXTURES,
+  "cowork/0f0f0f0f-0000-4000-8000-00000000000f/1a1a1a1a-0000-4000-8000-00000000001a",
+);
+export const COWORK_NEW_ID = "aaaa0001-0000-4000-8000-000000000001";
+export const COWORK_NEW_AUDIT = join(COWORK_ACCOUNT, "aaaa0001", "audit.jsonl");
+export const COWORK_NEW_SIDECAR = join(COWORK_ACCOUNT, `local_${COWORK_NEW_ID}.json`);
+export const COWORK_OLD_ID = "bbbb0002-0000-4000-8000-000000000002";
+export const COWORK_OLD_AUDIT = join(COWORK_ACCOUNT, `local_${COWORK_OLD_ID}`, "audit.jsonl");
+export const COWORK_OLD_SIDECAR = join(COWORK_ACCOUNT, `local_${COWORK_OLD_ID}.json`);
 export const GEMINI_PATH = join(FIXTURES, "gemini/tmp/demo/chats/session-2026-05-04T05-37-77677bcc.jsonl");
 
 export function fixtureConfig(overrides: Partial<Config> = {}): Config {
@@ -36,6 +46,7 @@ export function fixtureConfig(overrides: Partial<Config> = {}): Config {
     claudeExtraRoots: [],
     claudeHistoryPath: join(FIXTURES, "claude/no-history.jsonl"),
     claudeLegacyStorePath: join(FIXTURES, "claude/no-store.db"),
+    coworkRoot: join(FIXTURES, "cowork"),
     archiveDir: scratchDir("archive"),
     codexRoot: join(FIXTURES, "codex/sessions"),
     codexArchivedRoot: join(FIXTURES, "codex/archived_sessions"),

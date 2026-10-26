@@ -2,6 +2,7 @@ import { basename } from "node:path";
 import type { Agent, Block, Transcript } from "../shared/model";
 import { parseClaude } from "./claude";
 import { parseCodex } from "./codex";
+import { parseCowork } from "./cowork";
 import { parseGemini } from "./gemini";
 
 export interface ParseContext {
@@ -20,6 +21,8 @@ export function parseTranscript(agent: Agent, text: string, ctx: ParseContext): 
       const id = ctx.agentId ? stem.replace(/^agent-/, "") : stem;
       return parseClaude(text, { path: ctx.path, id, agentId: ctx.agentId ?? null });
     }
+    case "cowork":
+      return parseCowork(text, { path: ctx.path });
     case "codex":
       return parseCodex(text, { path: ctx.path, fallbackId: CODEX_FILE_ID_RE.exec(stem)?.[1] ?? stem });
     case "gemini":

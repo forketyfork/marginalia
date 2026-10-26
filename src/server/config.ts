@@ -9,6 +9,8 @@ export interface Config {
   claudeExtraRoots: string[];
   claudeHistoryPath: string;
   claudeLegacyStorePath: string;
+  /** Claude desktop app sessions (Cowork): `<org>/<account>/<session>/audit.jsonl` plus a `local_<uuid>.json` sidecar. */
+  coworkRoot: string;
   codexRoot: string;
   codexArchivedRoot: string;
   geminiRoot: string;
@@ -38,6 +40,9 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
         : env.MARGINALIA_CLAUDE_EXTRA_ROOTS.split(":").filter((p) => p.length > 0),
     claudeHistoryPath: env.MARGINALIA_CLAUDE_HISTORY ?? join(home, ".claude", "history.jsonl"),
     claudeLegacyStorePath: env.MARGINALIA_CLAUDE_LEGACY_STORE ?? join(home, ".claude", "__store.db"),
+    coworkRoot:
+      env.MARGINALIA_COWORK_ROOT ??
+      join(home, "Library", "Application Support", "Claude", "local-agent-mode-sessions"),
     codexRoot: env.MARGINALIA_CODEX_ROOT ?? join(home, ".codex", "sessions"),
     codexArchivedRoot: env.MARGINALIA_CODEX_ARCHIVED_ROOT ?? join(home, ".codex", "archived_sessions"),
     geminiRoot: env.MARGINALIA_GEMINI_ROOT ?? join(home, ".gemini", "tmp"),
