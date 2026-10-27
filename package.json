@@ -1,10 +1,11 @@
 {
   "name": "marginalia",
   "version": "0.1.0",
-  "description": "Local reader and annotator for Claude Code, Codex, and Gemini CLI session transcripts",
+  "description": "Local reader and annotator for Claude Code, Claude Cowork, Codex, and Gemini CLI session transcripts",
   "private": true,
   "type": "module",
   "license": "MIT",
+  "packageManager": "bun@1.4.4",
   "scripts": {
     "dev": "bun --hot src/server/main.ts",
     "start": "NODE_ENV=production bun src/server/main.ts",
